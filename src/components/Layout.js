@@ -21,7 +21,7 @@ const Layout = ({ children }) => {
       <Sidebar />
       <Main>{children}</Main>
       <Footer>
-        <p>&copy; 2025 旅行ブログ All Rights Reserved.</p>
+        <p>&copy; 2025 takatabi All Rights Reserved.</p>
       </Footer>
     </>
   );

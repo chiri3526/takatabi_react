@@ -112,17 +112,6 @@ const EyeCatch = styled.div`
   align-items: center;
   justify-content: center;
 `;
-const ArticleImageCircle = styled.img`
-  width: 140px;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-  border: 4px solid #fff;
-  background: #fff;
-  margin-top: -70px;
-  margin-bottom: 1.5em;
-`;
 // 関連記事リスト
 const RelatedSection = styled.div`
   margin-top: 48px;
