@@ -26,7 +26,7 @@ const ArticleTitle = styled.h1`
 `;
 const ArticleImageEyeCatch = styled.img`
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 18px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.13);
@@ -152,7 +152,7 @@ const RelatedCard = styled(Link)`
 `;
 const RelatedImage = styled.img`
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 18px;
   margin-bottom: 0.7em;
