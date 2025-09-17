@@ -77,14 +77,14 @@ const blogPosts = [
   {
     id: 2001,
     title: "パリの美術館巡り",
-    excerpt: "芸術の都パリで有名美術館を巡る旅。ルーブルやオルセーの魅力を紹介。",
+    excerpt: "芸術の都パリで���名美術館を巡る旅。ルーブルやオルセーの魅力を紹介。",
     image: require('../contents/photo/kyoto.jpg'),
     slug: "2001",
     category: "overseas"
   },
   {
     id: 3001,
-    title: "羽田空港ラウンジ体験記",
+    title: "羽田空港ラウンジ体験��",
     excerpt: "羽田空港のラウンジで過ごす快適なひととき。サービスや雰囲気をレポート。",
     image: require('../contents/photo/okinawa.jpg'),
     slug: "3001",
@@ -151,9 +151,9 @@ const HomePage = () => {
             <CategoryTitle>{cat.label}</CategoryTitle>
           </CategoryHeader>
           <BlogGrid>
-            {blogPosts.filter(post => post.category === cat.key).slice(0, 6).map(post => (
+            {blogPosts.filter(post => post.category === cat.key).slice(0, 4).map(post => (
               <Link
-                to={`/article/${post.slug}`}
+                to={`/?p=${post.slug}`}
                 key={post.id}
                 style={{ textDecoration: 'none' }}
               >

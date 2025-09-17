@@ -192,7 +192,7 @@ const ArticlePage = () => {
                 <RelatedCard to={`/article/${r.slug}`} key={r.slug}>
                   <RelatedImage style={{borderRadius:'18px', width:'90px', height:'90px', objectFit:'cover', marginBottom:'0.7em'}} src={r.image} alt={r.title} />
                   <RelatedCardTitle>{r.title}</RelatedCardTitle>
-                </RelatedCard>
+                <RelatedCard to={`/?p=${r.slug}`} key={r.slug}>
               ))}
             </RelatedList>
           </RelatedSection>

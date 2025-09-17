@@ -25,7 +25,7 @@ const article = {
 今宮神社の門前には、400年以上続く老舗の和菓子店<strong>「一和」</strong>と「かざりや」が並び、名物のあぶり餅を味わうことができます。香ばしい餅と甘い味噌だれは、京都観光の思い出になること間違いなしです。
 
 <h2>まとめ</h2>
-<img src="../contents/photo/kyoto2.jpg" alt="京都の風景" style="width:100%;max-width:600px;border-radius:16px;margin:24px auto 16px;display:block;aspect-ratio:4/3;object-fit:cover;" />
+<img src="/contents/photo/kyoto2.jpg" alt="京都の風景" style="width:100%;max-width:600px;border-radius:16px;margin:24px auto 16px;display:block;aspect-ratio:4/3;object-fit:cover;" />
 京都には有名な観光地だけでなく、地元の人々に愛される隠れたスポットがたくさんあります。次回の京都旅行では、ぜひ今回ご紹介した場所にも足を運んでみてください。きっと新しい京都の魅力に出会えるはずです。
 `,
   image: require('../contents/photo/kyoto.jpg'),
