@@ -1,22 +1,31 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 // import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import ArticlePage from './pages/ArticlePage';
 import './App.css';
 
-function App() {
+function AppContent() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const articleId = searchParams.get('p');
   return (
-    // <HelmetProvider>
-      <Layout>
-        {articleId ? <ArticlePage id={articleId} /> : <HomePage />}
-      </Layout>
-    // </HelmetProvider>
+    <Layout>
+      {articleId ? <ArticlePage id={articleId} /> : <HomePage />}
+    </Layout>
   );
 }
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}
+
+// <HelmetProvider>
+// </HelmetProvider>
 
 export default App;
