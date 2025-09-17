@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '../styles/theme';
 import { FaLink, FaArrowLeft } from 'react-icons/fa';
@@ -165,8 +165,8 @@ const RelatedCardTitle = styled.div`
   margin-top: 0.2em;
 `;
 
-const ArticlePage = () => {
-  const { id } = useParams();
+const ArticlePage = (props) => {
+  const id = props.id;
   const post = blogPosts.find(p => p.slug === id);
   // 関連記事（同じカテゴリで自分以外）
   const related = blogPosts.filter(p => p.category === post?.category && p.slug !== id);
