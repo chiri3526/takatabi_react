@@ -189,10 +189,10 @@ const ArticlePage = () => {
             <RelatedTitle><FaLink /> 関連ページ</RelatedTitle>
             <RelatedList>
               {related.map(r => (
-                <RelatedCard to={`/article/${r.slug}`} key={r.slug}>
+                <RelatedCard to={`/?p=${r.slug}`} key={r.slug}>
                   <RelatedImage style={{borderRadius:'18px', width:'90px', height:'90px', objectFit:'cover', marginBottom:'0.7em'}} src={r.image} alt={r.title} />
                   <RelatedCardTitle>{r.title}</RelatedCardTitle>
-                <RelatedCard to={`/?p=${r.slug}`} key={r.slug}>
+                </RelatedCard>
               ))}
             </RelatedList>
           </RelatedSection>
