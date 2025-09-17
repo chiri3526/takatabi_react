@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 // import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
