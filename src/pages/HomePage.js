@@ -162,40 +162,51 @@ const HomePage = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // CMS記事とその他記事を分離
+  const cmsArticles = jsonArticles;
+  const otherArticles = blogPosts.filter(post => !cmsArticles.some(cms => cms.id === post.id));
+
   return (
     <>
       <TopImage />
-      {categories.map(cat => (
-        <CategorySection key={cat.key}>
-          <CategoryHeader>
-            <CategoryIcon>{cat.icon}</CategoryIcon>
-            <CategoryTitle>{cat.label}</CategoryTitle>
-          </CategoryHeader>
-          <BlogGrid>
-            {blogPosts.filter(post => post.category === cat.key).slice(0, 4).map(post => (
-              <Link
-                to={`/?p=${post.slug}`}
-                key={post.id}
-                style={{ textDecoration: 'none' }}
-              >
-                <BlogCard>
-                  <BlogImage
-                    src={post.image}
-                    alt={post.title}
-                    onError={(e) => {
-                      e.target.src = '/sample-images/no-image.jpg';
-                    }}
-                  />
-                  <BlogContent>
-                    <BlogTitle>{post.title}</BlogTitle>
-                    <BlogExcerpt>{post.excerpt}</BlogExcerpt>
-                  </BlogContent>
-                </BlogCard>
-              </Link>
-            ))}
-          </BlogGrid>
-        </CategorySection>
-      ))}
+      {categories.map(cat => {
+        // カテゴリごとにCMS記事を優先して表示
+        const cmsForCat = cmsArticles.filter(post => post.category === cat.key);
+        const otherForCat = otherArticles.filter(post => post.category === cat.key);
+        // 4件まで表示、CMS記事優先
+        const postsToShow = [...cmsForCat, ...otherForCat].slice(0, 4);
+        return (
+          <CategorySection key={cat.key}>
+            <CategoryHeader>
+              <CategoryIcon>{cat.icon}</CategoryIcon>
+              <CategoryTitle>{cat.label}</CategoryTitle>
+            </CategoryHeader>
+            <BlogGrid>
+              {postsToShow.map(post => (
+                <Link
+                  to={`/?p=${post.slug}`}
+                  key={post.id}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <BlogCard>
+                    <BlogImage
+                      src={post.image}
+                      alt={post.title}
+                      onError={(e) => {
+                        e.target.src = '/sample-images/no-image.jpg';
+                      }}
+                    />
+                    <BlogContent>
+                      <BlogTitle>{post.title}</BlogTitle>
+                      <BlogExcerpt>{post.excerpt}</BlogExcerpt>
+                    </BlogContent>
+                  </BlogCard>
+                </Link>
+              ))}
+            </BlogGrid>
+          </CategorySection>
+        );
+      })}
     </>
   );
 };
