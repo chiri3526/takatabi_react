@@ -72,6 +72,7 @@ function importAllJson(r) {
 const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
 
 const blogPosts = [
+  ...jsonArticles,
   // 既存のjs記事
   {
     id: 1234,
@@ -122,8 +123,7 @@ const blogPosts = [
     image: index % 2 === 0 ? require('../contents/photo/kyoto.jpg') : require('../contents/photo/okinawa.jpg'),
     slug: `${1236 + index}`,
     category: ["domestic", "overseas", "lounge", "train"][index % 4]
-  })),
-  ...jsonArticles,
+  }))
 ];
 
 // 4区画レイアウト用のスタイル
