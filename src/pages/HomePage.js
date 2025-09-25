@@ -59,7 +59,14 @@ const BlogExcerpt = styled.p`
 
 // JSONファイルを一括取得
 function importAllJson(r) {
-  return r.keys().map(key => r(key));
+  return r.keys().map(key => {
+    const data = r(key);
+    // idがなければslugやファイル名から補完
+    return {
+      id: data.id || data.slug || key.replace(/^.*[\\\/]/, '').replace(/\.json$/, ''),
+      ...data
+    };
+  });
 }
 
 const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
