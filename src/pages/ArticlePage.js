@@ -10,7 +10,26 @@ import article1235 from '../articles/1235';
 import articleTest from '../articles/test';
 import topImage from '../contents/LP/takatabi.png';
 
-const blogPosts = [article1234, article1235, articleTest];
+// JSONファイルを一括取得
+function importAllJson(r) {
+  return r.keys().map(key => {
+    const data = r(key);
+    // idがなければslugやファイル名から補完
+    return {
+      id: data.id || data.slug || key.replace(/^.*[/]/, '').replace(/\.json$/, ''),
+      ...data
+    };
+  });
+}
+
+const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
+
+const blogPosts = [
+  ...jsonArticles,
+  article1234,
+  article1235,
+  articleTest
+];
 
 const ArticleContainer = styled.div`
   max-width: 700px;
