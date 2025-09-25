@@ -10,7 +10,7 @@ collections:
     label: "記事"
     folder: "src/articles"
     create: true
-    slug: "{{slug}}"
+    slug: "{{fields.slug}}"
     format: "json"
     fields:
       - { label: "タイトル", name: "title", widget: "string" }
