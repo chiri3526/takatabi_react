@@ -63,7 +63,7 @@ function importAllJson(r) {
     const data = r(key);
     // idがなければslugやファイル名から補完
     return {
-      id: data.id || data.slug || key.replace(/^.*[\/]/, '').replace(/\.json$/, ''),
+      id: data.id || data.slug || key.replace(/^.*[/]/, '').replace(/\.json$/, ''),
       ...data
     };
   });
