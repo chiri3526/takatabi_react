@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '../styles/theme';
@@ -7,9 +7,10 @@ import { FaLink, FaArrowLeft } from 'react-icons/fa';
 // 記事データを個別ファイルからimport
 import article1234 from '../articles/1234';
 import article1235 from '../articles/1235';
+import articleTest from '../articles/test';
 import topImage from '../contents/LP/takatabi.png';
 
-const blogPosts = [article1234, article1235];
+const blogPosts = [article1234, article1235, articleTest];
 
 const ArticleContainer = styled.div`
   max-width: 700px;
@@ -167,6 +168,9 @@ const RelatedCardTitle = styled.div`
 
 const ArticlePage = (props) => {
   const id = props.id;
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
   const post = blogPosts.find(p => p.slug === id);
   // 関連記事（同じカテゴリで自分以外）
   const related = blogPosts.filter(p => p.category === post?.category && p.slug !== id);

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
 import topImage from '../contents/LP/takatabi.png';
 import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain } from 'react-icons/fa';
+import articleTest from '../articles/test';
 
 const TopImage = styled.div`
   width: 100%;
@@ -56,8 +57,15 @@ const BlogExcerpt = styled.p`
   line-height: 1.5;
 `;
 
-// サンプルのブログ記事データをカテゴリ付きで更新
+// JSONファイルを一括取得
+function importAllJson(r) {
+  return r.keys().map(key => r(key));
+}
+
+const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
+
 const blogPosts = [
+  // 既存のjs記事
   {
     id: 1234,
     title: "京都の隠れた観光スポット",
@@ -98,6 +106,7 @@ const blogPosts = [
     slug: "4001",
     category: "train"
   },
+  articleTest,
   // テスト用に追加の記事データ
   ...Array(18).fill(null).map((_, index) => ({
     id: 1236 + index,
@@ -106,7 +115,8 @@ const blogPosts = [
     image: index % 2 === 0 ? require('../contents/photo/kyoto.jpg') : require('../contents/photo/okinawa.jpg'),
     slug: `${1236 + index}`,
     category: ["domestic", "overseas", "lounge", "train"][index % 4]
-  }))
+  })),
+  ...jsonArticles,
 ];
 
 // 4区画レイアウト用のスタイル
@@ -141,6 +151,10 @@ const categories = [
 ];
 
 const HomePage = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <>
       <TopImage />

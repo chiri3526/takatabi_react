@@ -11,11 +11,11 @@ collections:
     folder: "src/articles"
     create: true
     slug: "{{slug}}"
+    format: "json"
     fields:
       - { label: "タイトル", name: "title", widget: "string" }
       - { label: "抜粋", name: "excerpt", widget: "string" }
       - { label: "本文", name: "content", widget: "markdown" }
       - { label: "画像", name: "image", widget: "image" }
       - { label: "スラッグ", name: "slug", widget: "string" }
-      - { label: "カテゴリ", name: "category", widget: "string" }
-
+      - { label: "カテゴリ", name: "category", widget: "select", options: ["domestic", "overseas", "lounge", "train"] }
