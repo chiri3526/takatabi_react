@@ -47,7 +47,7 @@ const BlogContent = styled.div`
 const BlogTitle = styled.h2`
   color: ${theme.colors.text};
   margin: 0 0 ${theme.spacing.small};
-  font-size: 1.25rem;
+  font-size: 1rem; // 小さめに変更
 `;
 
 const BlogExcerpt = styled.p`

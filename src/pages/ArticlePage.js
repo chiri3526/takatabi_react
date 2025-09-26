@@ -40,7 +40,7 @@ const ArticleContainer = styled.div`
   padding: ${theme.spacing.xlarge};
 `;
 const ArticleTitle = styled.h1`
-  font-size: 2rem;
+  font-size: 1.2rem; // 小さめに変更
   color: ${theme.colors.primary};
   margin-bottom: ${theme.spacing.medium};
 `;
