@@ -1,4 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+// Google AdSense scriptをheadに挿入（重複防止）
+function useAdsenseScript() {
+  useEffect(() => {
+    if (!document.querySelector('script[src*="adsbygoogle.js?client=ca-pub-7728107798566122"]')) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7728107798566122';
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+    }
+  }, []);
+}
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '../styles/theme';
@@ -186,9 +198,19 @@ const RelatedCardTitle = styled.div`
 `;
 
 const ArticlePage = (props) => {
+  useAdsenseScript();
+  const adRef = useRef(null);
   const id = props.id;
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, [id]);
+  // AdSense広告の初期化
+  useEffect(() => {
+    if (window.adsbygoogle && adRef.current) {
+      try {
+        window.adsbygoogle.push({});
+      } catch (e) {}
+    }
   }, [id]);
   const post = blogPosts.find(p => p.slug === id);
   // 関連記事（同じカテゴリで自分以外）
@@ -207,6 +229,17 @@ const ArticlePage = (props) => {
           <ArticleImageEyeCatch src={post.image} alt={post.title} />
         </div>
         <ArticleContent dangerouslySetInnerHTML={{ __html: post.content }} />
+        {/* Google AdSense in-article広告ユニット */}
+        <div style={{margin: '32px 0', display: 'flex', justifyContent: 'center'}}>
+          <ins className="adsbygoogle"
+            style={{ display: 'block', textAlign: 'center' }}
+            data-ad-layout="in-article"
+            data-ad-format="fluid"
+            data-ad-client="ca-pub-7728107798566122"
+            data-ad-slot="5951785085"
+            ref={adRef}
+          ></ins>
+        </div>
         {related.length > 0 && (
           <RelatedSection>
             <RelatedTitle><FaLink /> 関連ページ</RelatedTitle>
