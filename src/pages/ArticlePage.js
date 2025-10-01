@@ -1,3 +1,41 @@
+import { useState, useMemo } from 'react';
+// 目次(Toc)コンポーネント
+const TocContainer = styled.nav`
+  background: #f6fff6;
+  border: 2px solid #2E7D32;
+  border-radius: 12px;
+  padding: 1em 1.5em;
+  margin-bottom: 2em;
+  font-size: 0.98rem;
+`;
+const TocList = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`;
+const TocItem = styled.li`
+  margin: 0.2em 0 0.2em 0.5em;
+  &.toc-h3 { margin-left: 1.5em; font-size: 0.95em; }
+`;
+const TocLink = styled.a`
+  color: #2E7D32;
+  text-decoration: none;
+  &:hover { text-decoration: underline; color: #1B5E20; }
+`;
+
+function generateTocAndContent(html) {
+  if (!html) return { toc: [], html };
+  let idx = 0;
+  const toc = [];
+  // h2/h3タグにidを付与しつつtoc配列を作る
+  const newHtml = html.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/g, (match, tag, attrs, text) => {
+    const cleanText = text.replace(/<[^>]+>/g, '');
+    const id = `heading-${tag}-${idx++}`;
+    toc.push({ tag, text: cleanText, id });
+    return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
+  });
+  return { toc, html: newHtml };
+}
 
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
@@ -213,6 +251,8 @@ const ArticlePage = (props) => {
     }
   }, [id]);
   const post = blogPosts.find(p => p.slug === id);
+  // 目次とid付きHTML生成
+  const { toc, html: contentWithIds } = useMemo(() => generateTocAndContent(post?.content), [post]);
   // 関連記事（同じカテゴリで自分以外）
   const related = blogPosts.filter(p => p.category === post?.category && p.slug !== id);
 
@@ -225,10 +265,23 @@ const ArticlePage = (props) => {
       <EyeCatch />
       <ArticleContainer>
         <ArticleTitle>{post.title}</ArticleTitle>
+        {/* 目次 */}
+        {toc.length > 0 && (
+          <TocContainer aria-label="目次">
+            <strong style={{color:'#1B5E20'}}>目次</strong>
+            <TocList>
+              {toc.map(item => (
+                <TocItem key={item.id} className={`toc-${item.tag}`}>
+                  <TocLink href={`#${item.id}`}>{item.text}</TocLink>
+                </TocItem>
+              ))}
+            </TocList>
+          </TocContainer>
+        )}
         <div style={{display:'flex', justifyContent:'center'}}>
           <ArticleImageEyeCatch src={post.image} alt={post.title} />
         </div>
-        <ArticleContent dangerouslySetInnerHTML={{ __html: post.content }} />
+        <ArticleContent dangerouslySetInnerHTML={{ __html: contentWithIds }} />
         {/* Google AdSense in-article広告ユニット */}
         <div style={{margin: '32px 0', display: 'flex', justifyContent: 'center'}}>
           <ins className="adsbygoogle"

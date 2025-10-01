@@ -2,17 +2,29 @@ import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
-import topImage from '../contents/LP/takatabi.png';
+
 import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain } from 'react-icons/fa';
 import articleTest from '../articles/test';
 
-const TopImage = styled.div`
+const TopLogo = styled.div`
   width: 100%;
-  height: 180px; // 高さを小さく変更
-  background-image: url(${topImage});
-  background-size: cover;
-  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   margin-bottom: ${theme.spacing.large};
+`;
+
+const LogoText = styled.h1`
+  font-family: 'Noto Sans JP', 'Roboto', 'メイリオ', sans-serif;
+  font-size: 2.5rem;
+  color: #2E7D32;
+  background: #fff;
+  border: 3px solid #1B5E20;
+  border-radius: 18px;
+  padding: 0.3em 1.5em;
+  box-shadow: 0 2px 8px rgba(27,94,32,0.08);
+  letter-spacing: 0.1em;
+  display: inline-block;
 `;
 
 const BlogGrid = styled.div`
@@ -168,7 +180,9 @@ const HomePage = () => {
 
   return (
     <>
-      <TopImage />
+      <TopLogo>
+        <LogoText>takatabi</LogoText>
+      </TopLogo>
       {categories.map(cat => {
         // カテゴリごとにCMS記事を優先して表示
         const cmsForCat = cmsArticles.filter(post => post.category === cat.key);
