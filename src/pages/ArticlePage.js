@@ -1,4 +1,14 @@
-import { useState, useMemo } from 'react';
+
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import styled from '@emotion/styled';
+import { theme } from '../styles/theme';
+import { FaLink, FaArrowLeft } from 'react-icons/fa';
+import article1234 from '../articles/1234';
+import article1235 from '../articles/1235';
+import articleTest from '../articles/test';
+import topImage from '../contents/LP/takatabi.png';
+
 // 目次(Toc)コンポーネント
 const TocContainer = styled.nav`
   background: #f6fff6;
@@ -36,16 +46,6 @@ function generateTocAndContent(html) {
   });
   return { toc, html: newHtml };
 }
-
-import React, { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import styled from '@emotion/styled';
-import { theme } from '../styles/theme';
-import { FaLink, FaArrowLeft } from 'react-icons/fa';
-import article1234 from '../articles/1234';
-import article1235 from '../articles/1235';
-import articleTest from '../articles/test';
-import topImage from '../contents/LP/takatabi.png';
 
 // JSONファイルを一括取得
 function importAllJson(r) {
