@@ -43,11 +43,16 @@ function generateTocAndContent(html) {
   let idx = 0;
   const toc = [];
   // h2/h3タグにidを付与しつつtoc配列を作る
-  const newHtml = html.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/g, (match, tag, attrs, text) => {
+  let newHtml = html.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/g, (match, tag, attrs, text) => {
     const cleanText = text.replace(/<[^>]+>/g, '');
     const id = `heading-${tag}-${idx++}`;
     toc.push({ tag, text: cleanText, id });
     return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
+  });
+  // imgタグのsrcが/contents/で始まる場合、絶対パスに補正
+  newHtml = newHtml.replace(/<img([^>]*?)src=["'](\/contents\/[^"'>]+)["']([^>]*)>/g, (match, before, src, after) => {
+    // Netlify等のpublic直下をルートとする
+    return `<img${before}src="${src}"${after}>`;
   });
   return { toc, html: newHtml };
 }
