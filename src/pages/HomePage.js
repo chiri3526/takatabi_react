@@ -171,7 +171,7 @@ const HomePage = () => {
   return (
     <>
       <TopLogo>
-        <img src={takatabi1} alt="takatabi" style={{height:'80px', width:'auto', borderRadius:'16px', boxShadow:'0 2px 8px rgba(27,94,32,0.08)'}} />
+  <img src={takatabi1} alt="takatabi" style={{height:'140px', width:'auto', borderRadius:'16px', boxShadow:'0 2px 8px rgba(27,94,32,0.08)'}} />
       </TopLogo>
       {categories.map(cat => {
         // カテゴリごとにCMS記事を優先して表示
