@@ -1,3 +1,4 @@
+import takatabi1 from '../contents/LP/takatabi1.png';
 import React, { useEffect } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
@@ -14,18 +15,7 @@ const TopLogo = styled.div`
   margin-bottom: ${theme.spacing.large};
 `;
 
-const LogoText = styled.h1`
-  font-family: 'Noto Sans JP', 'Roboto', 'メイリオ', sans-serif;
-  font-size: 2.5rem;
-  color: #2E7D32;
-  background: #fff;
-  border: 3px solid #1B5E20;
-  border-radius: 18px;
-  padding: 0.3em 1.5em;
-  box-shadow: 0 2px 8px rgba(27,94,32,0.08);
-  letter-spacing: 0.1em;
-  display: inline-block;
-`;
+
 
 const BlogGrid = styled.div`
   display: grid;
@@ -181,7 +171,7 @@ const HomePage = () => {
   return (
     <>
       <TopLogo>
-        <LogoText>takatabi</LogoText>
+        <img src={takatabi1} alt="takatabi" style={{height:'80px', width:'auto', borderRadius:'16px', boxShadow:'0 2px 8px rgba(27,94,32,0.08)'}} />
       </TopLogo>
       {categories.map(cat => {
         // カテゴリごとにCMS記事を優先して表示
