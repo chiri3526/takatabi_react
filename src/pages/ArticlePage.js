@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '../styles/theme';
