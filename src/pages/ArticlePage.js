@@ -1,22 +1,9 @@
+
 import React, { useEffect, useRef } from 'react';
-// Google AdSense scriptをheadに挿入（重複防止）
-function useAdsenseScript() {
-  useEffect(() => {
-    if (!document.querySelector('script[src*="adsbygoogle.js?client=ca-pub-7728107798566122"]')) {
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7728107798566122';
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    }
-  }, []);
-}
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '../styles/theme';
 import { FaLink, FaArrowLeft } from 'react-icons/fa';
-
-// 記事データを個別ファイルからimport
 import article1234 from '../articles/1234';
 import article1235 from '../articles/1235';
 import articleTest from '../articles/test';
@@ -32,6 +19,19 @@ function importAllJson(r) {
       ...data
     };
   });
+}
+
+// Google AdSense scriptをheadに挿入（重複防止）
+function useAdsenseScript() {
+  useEffect(() => {
+    if (!document.querySelector('script[src*="adsbygoogle.js?client=ca-pub-7728107798566122"]')) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7728107798566122';
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+    }
+  }, []);
 }
 
 const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
