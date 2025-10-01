@@ -7,7 +7,7 @@ import { FaLink, FaArrowLeft } from 'react-icons/fa';
 import article1234 from '../articles/1234';
 import article1235 from '../articles/1235';
 import articleTest from '../articles/test';
-import topImage from '../contents/LP/takatabi.png';
+
 
 // 目次(Toc)コンポーネント
 const TocContainer = styled.nav`
@@ -15,8 +15,13 @@ const TocContainer = styled.nav`
   border: 2px solid #2E7D32;
   border-radius: 12px;
   padding: 1em 1.5em;
-  margin-bottom: 2em;
+  margin: 2em auto 2em auto;
   font-size: 0.98rem;
+  width: 60%;
+  max-width: 500px;
+  min-width: 220px;
+  box-sizing: border-box;
+  display: block;
 `;
 const TocList = styled.ul`
   list-style: none;
@@ -171,17 +176,7 @@ const BackLink = styled(Link)`
     border-color: ${theme.colors.primary};
   }
 `;
-const EyeCatch = styled.div`
-  width: 100%;
-  height: 180px;
-  background-image: url(${topImage});
-  background-size: cover;
-  background-position: center;
-  margin-bottom: ${theme.spacing.large};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+
 // 関連記事リスト
 const RelatedSection = styled.div`
   margin-top: 48px;
@@ -262,9 +257,12 @@ const ArticlePage = (props) => {
 
   return (
     <>
-      <EyeCatch />
+  {/* EyeCatch削除: 記事ごとの画像のみ表示 */}
       <ArticleContainer>
         <ArticleTitle>{post.title}</ArticleTitle>
+        <div style={{display:'flex', justifyContent:'center'}}>
+          <ArticleImageEyeCatch src={post.image} alt={post.title} />
+        </div>
         {/* 目次 */}
         {toc.length > 0 && (
           <TocContainer aria-label="目次">
@@ -278,9 +276,6 @@ const ArticlePage = (props) => {
             </TocList>
           </TocContainer>
         )}
-        <div style={{display:'flex', justifyContent:'center'}}>
-          <ArticleImageEyeCatch src={post.image} alt={post.title} />
-        </div>
         <ArticleContent dangerouslySetInnerHTML={{ __html: contentWithIds }} />
         {/* Google AdSense in-article広告ユニット */}
         <div style={{margin: '32px 0', display: 'flex', justifyContent: 'center'}}>
