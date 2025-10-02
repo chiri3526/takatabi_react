@@ -145,7 +145,7 @@ const Sidebar = () => {
                     <SubCategoryList>
                       {category.children.map(sub => (
                         <SubCategoryItem key={sub.id}>
-                          <Link to={`/category/${sub.slug}`} onClick={() => setIsOpen(false)}>
+                          <Link to={`/?category=${sub.slug}`} onClick={() => setIsOpen(false)}>
                             {sub.name}
                           </Link>
                         </SubCategoryItem>
@@ -154,7 +154,7 @@ const Sidebar = () => {
                   )}
                 </>
               ) : (
-                <Link to={`/category/${category.slug}`} onClick={() => setIsOpen(false)}>
+                <Link to={`/?category=${category.slug}`} onClick={() => setIsOpen(false)}>
                   {category.name}
                 </Link>
               )}
