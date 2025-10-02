@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
@@ -22,6 +21,11 @@ const TocContainer = styled.nav`
   min-width: 220px;
   box-sizing: border-box;
   display: block;
+  @media (max-width: 600px) {
+    width: 80vw;
+    font-size: 0.92rem;
+    padding: 0.7em 0.7em;
+  }
 `;
 const TocList = styled.ul`
   list-style: none;
@@ -31,6 +35,9 @@ const TocList = styled.ul`
 const TocItem = styled.li`
   margin: 0.2em 0 0.2em 0.5em;
   &.toc-h3 { margin-left: 1.5em; font-size: 0.95em; }
+  @media (max-width: 600px) {
+    &.toc-h3 { margin-left: 1em; font-size: 0.9em; }
+  }
 `;
 const TocLink = styled.a`
   color: #2E7D32;
