@@ -27,12 +27,12 @@ const BlogImage = styled.img`
   display: block;
   margin: 0 auto 0.5em auto;
   @media (max-width: 600px) {
-    width: 50%;
-    height: 70px;
-    max-width: 180px;
-    min-width: 80px;
-    margin-top: 60px; /* ハンバーガーメニューと重ならないように */
-    border-radius: 0;
+    width: 100%;
+    height: 120px;
+    max-width: 100%;
+    min-width: 0;
+    margin-top: 0;
+    border-radius: 8px;
   }
 `;
 const BlogContent = styled.div`
