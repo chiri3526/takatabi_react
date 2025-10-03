@@ -56,10 +56,14 @@ function generateTocAndContent(html) {
     toc.push({ tag, text: cleanText, id });
     return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
   });
-  // imgタグのsrcが/contents/で始まる場合、絶対パスに補正
+  // imgタグのsrcが/contents/で始まる場合、絶対パスに補正し、スタイルを追加
   newHtml = newHtml.replace(/<img([^>]*?)src=["'](\/contents\/[^"'>]+)["']([^>]*)>/g, (match, before, src, after) => {
-    // Netlify等のpublic直下をルートとする
-    return `<img${before}src="${src}"${after}>`;
+    // 画像に基本的なスタイルを適用
+    const style = 'style="width: 100%; max-width: 600px; height: auto; border-radius: 8px; margin: 1em auto; display: block; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"';
+    // publicディレクトリの画像へのパスを確実にする
+    const publicUrl = process.env.PUBLIC_URL || '';
+    const fullSrc = `${publicUrl}${src}`;
+    return `<img${before}src="${fullSrc}"${after} ${style}>`;
   });
   return { toc, html: newHtml };
 }
@@ -122,13 +126,13 @@ const ArticleImageEyeCatch = styled.img`
 `;
 const ArticleContent = styled.div`
   color: ${theme.colors.text};
-  font-size: 1.1rem;
-  line-height: 1.8;
+  font-size: 0.85rem;
+  line-height: 1.7;
   font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
 
   h2 {
     color: ${theme.colors.primary};
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     border-left: 7px solid ${theme.colors.primary};
     border-radius: 0 12px 12px 0;
     padding-left: 0.7em;
@@ -139,7 +143,7 @@ const ArticleContent = styled.div`
   }
   h3 {
     color: ${theme.colors.secondary};
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin: 1.5em 0 0.7em 0;
     font-weight: bold;
     border-left: 5px solid ${theme.colors.secondary};
@@ -150,7 +154,7 @@ const ArticleContent = styled.div`
   }
   h4 {
     color: ${theme.colors.accent};
-    font-size: 1.05rem;
+    font-size: 1.0rem;
     margin: 1.2em 0 0.5em 0;
     font-weight: bold;
     border-left: 4px dashed ${theme.colors.accent};
