@@ -13,6 +13,17 @@ const TopLogo = styled.div`
   justify-content: center;
   align-items: center;
   margin-bottom: ${theme.spacing.large};
+  @media (max-width: 600px) {
+    img {
+      width: 50vw;
+      max-width: 180px;
+      min-width: 80px;
+      height: 60px;
+      object-fit: contain;
+      margin-top: 60px;
+      border-radius: 0;
+    }
+  }
 `;
 
 
@@ -40,6 +51,16 @@ const BlogImage = styled.img`
   width: 100%;
   height: 200px;
   object-fit: cover;
+  display: block;
+  margin: 0 auto 0.5em auto;
+  @media (max-width: 600px) {
+    width: 50%;
+    height: 70px;
+    max-width: 180px;
+    min-width: 80px;
+    margin-top: 60px; /* ハンバーガーメニューと重ならないように */
+    border-radius: 0;
+  }
 `;
 
 const BlogContent = styled.div`

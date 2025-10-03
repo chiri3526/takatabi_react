@@ -119,6 +119,17 @@ const ArticleImageEyeCatch = styled.img`
   box-shadow: 0 2px 8px rgba(0,0,0,0.13);
   background: #fff;
   margin-bottom: 1.5em;
+  @media (max-width: 600px) {
+    width: 50%;
+    height: 70px;
+    max-width: 180px;
+    min-width: 80px;
+    margin-top: 60px;
+    border-radius: 0;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
 `;
 const ArticleContent = styled.div`
   color: ${theme.colors.text};
