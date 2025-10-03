@@ -24,16 +24,6 @@ const BlogImage = styled.img`
   width: 100%;
   height: 200px;
   object-fit: cover;
-  display: block;
-  margin: 0 auto 0.5em auto;
-  @media (max-width: 600px) {
-    width: 100%;
-    height: 120px;
-    max-width: 100%;
-    min-width: 0;
-    margin-top: 0;
-    border-radius: 8px;
-  }
 `;
 const BlogContent = styled.div`
   padding: ${theme.spacing.medium};

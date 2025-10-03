@@ -12,21 +12,17 @@ const TopLogo = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: ${theme.spacing.large};
-  @media (max-width: 600px) {
-    img {
-      width: 50vw;
-      max-width: 180px;
-      min-width: 80px;
-      height: 60px;
-      object-fit: contain;
-      margin-top: 60px;
-      border-radius: 0;
-    }
+  margin-bottom: 0;
+
+  img {
+    width: 50%;
+    height: 70px;
+    border-radius: 0;
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
   }
 `;
-
-
 
 const BlogGrid = styled.div`
   display: grid;
@@ -51,16 +47,6 @@ const BlogImage = styled.img`
   width: 100%;
   height: 200px;
   object-fit: cover;
-  display: block;
-  margin: 0 auto 0.5em auto;
-  @media (max-width: 600px) {
-    width: 50%;
-    height: 70px;
-    max-width: 180px;
-    min-width: 80px;
-    margin-top: 60px; /* ハンバーガーメニューと重ならないように */
-    border-radius: 0;
-  }
 `;
 
 const BlogContent = styled.div`
@@ -192,7 +178,7 @@ const HomePage = () => {
   return (
     <>
       <TopLogo>
-  <img src={takatabi1} alt="takatabi" style={{height:'140px', width:'auto', borderRadius:'16px', boxShadow:'0 2px 8px rgba(27,94,32,0.08)'}} />
+  <img src={takatabi1} alt="takatabi" style={{width:'50%', height:'70px', borderRadius:'0'}} />
       </TopLogo>
       {categories.map(cat => {
         // カテゴリごとにCMS記事を優先して表示

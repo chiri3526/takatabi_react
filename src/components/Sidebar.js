@@ -36,7 +36,7 @@ const MenuButton = styled.button`
     display: block;
     height: 3px;
     width: 100%;
-    background-color: ${theme.colors.white};
+    background-color: black;
     transition: transform 0.3s ease;
   }
 
