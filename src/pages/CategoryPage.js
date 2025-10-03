@@ -24,6 +24,15 @@ const BlogImage = styled.img`
   width: 100%;
   height: 200px;
   object-fit: cover;
+  display: block;
+  margin: 0 auto 0.5em auto;
+  @media (max-width: 600px) {
+    width: 70%;
+    height: 110px;
+    max-width: 220px;
+    min-width: 120px;
+    border-radius: 12px;
+  }
 `;
 const BlogContent = styled.div`
   padding: ${theme.spacing.medium};
@@ -159,4 +168,3 @@ const CategoryPage = ({ category }) => {
 };
 
 export default CategoryPage;
-
