@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
 import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain } from 'react-icons/fa';
+import { fetchArticles } from '../api/microcms';
 
 const BlogGrid = styled.div`
   display: grid;
@@ -123,8 +124,22 @@ const blogPosts = [
 ];
 
 const CategoryPage = ({ category }) => {
+  const [cmsArticles, setCmsArticles] = useState([]);
+
+  useEffect(() => {
+    fetchArticles().then(data => {
+      if (data && data.contents) {
+        setCmsArticles(data.contents);
+      }
+    });
+  }, []);
+
   const cat = categories.find(c => c.key === category);
-  const posts = blogPosts.filter(post => post.category === category);
+  // microCMS記事とローカル記事を統合
+  const posts = [
+    ...cmsArticles.filter(post => post.category === category),
+    ...blogPosts.filter(post => post.category === category && !cmsArticles.some(cms => cms.id === post.id))
+  ];
   return (
     <div>
       <CategoryHeader>
@@ -134,7 +149,7 @@ const CategoryPage = ({ category }) => {
       <BlogGrid>
         {posts.map(post => (
           <Link
-            to={`/?p=${post.slug}`}
+            to={`/?p=${post.slug || post.id}`}
             key={post.id}
             style={{ textDecoration: 'none' }}
           >
