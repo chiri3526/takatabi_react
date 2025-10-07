@@ -61,10 +61,10 @@ const CategoryTitle = styled.h2`
 `;
 
 const categories = [
-  { key: 'domestic', label: '国内旅行', icon: <FaMapMarkerAlt /> },
-  { key: 'overseas', label: '海外旅行', icon: <FaGlobeAsia /> },
-  { key: 'lounge', label: 'ラウンジ', icon: <FaCouch /> },
-  { key: 'train', label: '鉄道', icon: <FaTrain /> }
+  { key: 'domestic', label: '国内旅行', cmsName: '国内旅行', icon: <FaMapMarkerAlt /> },
+  { key: 'overseas', label: '海外旅行', cmsName: '海外旅行', icon: <FaGlobeAsia /> },
+  { key: 'lounge', label: 'ラウンジ', cmsName: 'ラウンジ', icon: <FaCouch /> },
+  { key: 'train', label: '鉄道', cmsName: '鉄道', icon: <FaTrain /> }
 ];
 
 function importAllJson(r) {
@@ -137,8 +137,18 @@ const CategoryPage = ({ category }) => {
   const cat = categories.find(c => c.key === category);
   // microCMS記事とローカル記事を統合
   const posts = [
-    ...cmsArticles.filter(post => post.category === category),
-    ...blogPosts.filter(post => post.category === category && !cmsArticles.some(cms => cms.id === post.id))
+    ...cmsArticles.filter(post => {
+      if (post.category && typeof post.category === 'object') {
+        return post.category.name === cat.cmsName;
+      }
+      return post.category === category;
+    }),
+    ...blogPosts.filter(post => post.category === category && !cmsArticles.some(cms => {
+      if (cms.category && typeof cms.category === 'object') {
+        return cms.category.name === cat.cmsName;
+      }
+      return cms.category === category;
+    }))
   ];
   return (
     <div>

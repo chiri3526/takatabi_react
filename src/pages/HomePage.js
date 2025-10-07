@@ -161,10 +161,10 @@ const CategoryTitle = styled.h2`
 `;
 
 const categories = [
-  { key: 'domestic', label: '国内旅行', icon: <FaMapMarkerAlt /> },
-  { key: 'overseas', label: '海外旅行', icon: <FaGlobeAsia /> },
-  { key: 'lounge', label: 'ラウンジ', icon: <FaCouch /> },
-  { key: 'train', label: '鉄道', icon: <FaTrain /> }
+  { key: 'domestic', label: '国内旅行', cmsName: '国内旅行', icon: <FaMapMarkerAlt /> },
+  { key: 'overseas', label: '海外旅行', cmsName: '海外旅行', icon: <FaGlobeAsia /> },
+  { key: 'lounge', label: 'ラウンジ', cmsName: 'ラウンジ', icon: <FaCouch /> },
+  { key: 'train', label: '鉄道', cmsName: '鉄道', icon: <FaTrain /> }
 ];
 
 const HomePage = () => {
@@ -190,7 +190,14 @@ const HomePage = () => {
       </TopLogo>
       {categories.map(cat => {
         // microCMS記事を優先
-        const cmsForCat = cmsArticles.filter(post => post.category === cat.key);
+        const cmsForCat = cmsArticles.filter(post => {
+          // microCMS記事のcategoryはオブジェクト
+          if (post.category && typeof post.category === 'object') {
+            return post.category.name === cat.cmsName;
+          }
+          // 旧形式（文字列）
+          return post.category === cat.key;
+        });
         const otherForCat = otherArticles.filter(post => post.category === cat.key);
         const postsToShow = [...cmsForCat, ...otherForCat].slice(0, 4);
         return (
