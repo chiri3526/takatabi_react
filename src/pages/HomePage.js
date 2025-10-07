@@ -1,8 +1,9 @@
 import takatabi1 from '../contents/LP/takatabi1.png';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
+import { fetchArticles } from '../api/microcms';
 
 import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain } from 'react-icons/fa';
 import articleTest from '../articles/test';
@@ -167,24 +168,30 @@ const categories = [
 ];
 
 const HomePage = () => {
+  const [cmsArticles, setCmsArticles] = useState([]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    // microCMSから記事取得
+    fetchArticles().then(data => {
+      if (data && data.contents) {
+        setCmsArticles(data.contents);
+      }
+    });
   }, []);
 
-  // CMS記事とその他記事を分離
-  const cmsArticles = jsonArticles;
+  // 既存記事（ローカル）
   const otherArticles = blogPosts.filter(post => !cmsArticles.some(cms => cms.id === post.id));
 
   return (
     <>
       <TopLogo>
-  <img src={takatabi1} alt="takatabi" style={{width:'50%', height:'70px', borderRadius:'0'}} />
+        <img src={takatabi1} alt="takatabi" style={{width:'50%', height:'70px', borderRadius:'0'}} />
       </TopLogo>
       {categories.map(cat => {
-        // カテゴリごとにCMS記事を優先して表示
+        // microCMS記事を優先
         const cmsForCat = cmsArticles.filter(post => post.category === cat.key);
         const otherForCat = otherArticles.filter(post => post.category === cat.key);
-        // 4件まで表示、CMS記事優先
         const postsToShow = [...cmsForCat, ...otherForCat].slice(0, 4);
         return (
           <CategorySection key={cat.key}>
@@ -195,7 +202,7 @@ const HomePage = () => {
             <BlogGrid>
               {postsToShow.map(post => (
                 <Link
-                  to={`/?p=${post.slug}`}
+                  to={`/?p=${post.slug || post.id}`}
                   key={post.id}
                   style={{ textDecoration: 'none' }}
                 >
