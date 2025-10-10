@@ -287,8 +287,6 @@ const ArticlePage = (props) => {
 
   // アイキャッチ画像
   const imageUrl = post.image?.url || post.image;
-  // 本文（HTML）
-  const htmlContent = post.content || post.body || post.description || '';
 
   return (
     <>
