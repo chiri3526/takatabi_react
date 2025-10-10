@@ -19,7 +19,7 @@ const SidebarContainer = styled.div`
 
 const MenuButton = styled.button`
   position: fixed;
-  top: 20px;
+  top: 60px; // 座標を下にずらす
   left: 20px;
   z-index: 1001;
   background: none;
