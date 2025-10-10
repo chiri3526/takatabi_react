@@ -6,6 +6,7 @@ import { FaLink, FaArrowLeft } from 'react-icons/fa';
 import article1234 from '../articles/1234';
 import article1235 from '../articles/1235';
 import articleTest from '../articles/test';
+import { fetchArticleById } from '../api/microcms';
 
 
 // 目次(Toc)コンポーネント
@@ -250,9 +251,23 @@ const ArticlePage = (props) => {
   useAdsenseScript();
   const adRef = useRef(null);
   const id = props.id;
+  const [cmsArticle, setCmsArticle] = React.useState(null);
+  const post = useMemo(() => {
+    // まずローカル記事を探す
+    const local = blogPosts.find(p => p.slug === id || p.id === id);
+    if (local) return local;
+    // microCMS記事（APIで取得）
+    return cmsArticle;
+  }, [id, cmsArticle]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    // ローカル記事がなければmicroCMS APIで取得
+    if (!blogPosts.find(p => p.slug === id || p.id === id)) {
+      fetchArticleById(id).then(data => setCmsArticle(data)).catch(() => setCmsArticle(null));
+    }
   }, [id]);
+
   // AdSense広告の初期化
   useEffect(() => {
     if (window.adsbygoogle && adRef.current) {
@@ -261,7 +276,6 @@ const ArticlePage = (props) => {
       } catch (e) {}
     }
   }, [id]);
-  const post = blogPosts.find(p => p.slug === id);
   // 目次とid付きHTML生成
   const { toc, html: contentWithIds } = useMemo(() => generateTocAndContent(post?.content), [post]);
   // 関連記事（同じカテゴリで自分以外）
@@ -271,13 +285,18 @@ const ArticlePage = (props) => {
     return <ArticleContainer>記事が見つかりませんでした。</ArticleContainer>;
   }
 
+  // アイキャッチ画像
+  const imageUrl = post.image?.url || post.image;
+  // 本文（HTML）
+  const htmlContent = post.content || post.body || post.description || '';
+
   return (
     <>
   {/* EyeCatch削除: 記事ごとの画像のみ表示 */}
       <ArticleContainer>
         <ArticleTitle>{post.title}</ArticleTitle>
         <div style={{display:'flex', justifyContent:'center'}}>
-          <ArticleImageEyeCatch src={post.image} alt={post.title} />
+          <ArticleImageEyeCatch src={imageUrl} alt={post.title} />
         </div>
         {/* 目次 */}
         {toc.length > 0 && (

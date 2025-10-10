@@ -215,7 +215,7 @@ const HomePage = () => {
                 >
                   <BlogCard>
                     <BlogImage
-                      src={post.image}
+                      src={post.image?.url || post.image}
                       alt={post.title}
                       onError={(e) => {
                         e.target.src = '/sample-images/no-image.jpg';
