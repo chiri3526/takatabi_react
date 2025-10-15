@@ -1,3 +1,24 @@
+const BackLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: ${theme.spacing.large};
+  color: ${theme.colors.primary};
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.05rem;
+  background: #f6fff6;
+  border-radius: 6px;
+  padding: 0.5em 1.2em;
+  box-shadow: 0 2px 8px rgba(0,128,64,0.07);
+  border: 1.5px solid ${theme.colors.primary}33;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  &:hover {
+    background: ${theme.colors.primary};
+    color: #fff;
+    border-color: ${theme.colors.primary};
+  }
+`;
 import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
@@ -152,14 +173,10 @@ const CategoryPage = ({ category }) => {
   ];
   return (
     <div>
-      <CategoryHeader>
-        <CategoryIcon>{cat?.icon}</CategoryIcon>
-        <CategoryTitle>{cat?.label || category}</CategoryTitle>
-      </CategoryHeader>
       <BlogGrid>
         {posts.map(post => (
           <Link
-            to={`/?p=${post.slug || post.id}`}
+            to={`/?p=${post.slug}`}
             key={post.id}
             style={{ textDecoration: 'none' }}
           >
@@ -167,7 +184,7 @@ const CategoryPage = ({ category }) => {
               <BlogImage
                 src={post.image}
                 alt={post.title}
-                onError={e => {
+                onError={(e) => {
                   e.target.src = '/sample-images/no-image.jpg';
                 }}
               />
@@ -179,6 +196,11 @@ const CategoryPage = ({ category }) => {
           </Link>
         ))}
       </BlogGrid>
+      <div style={{textAlign:'center'}}>
+        <BackLink to="/">
+          トップページへ戻る
+        </BackLink>
+      </div>
     </div>
   );
 };
