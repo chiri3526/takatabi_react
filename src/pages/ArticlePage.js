@@ -83,6 +83,12 @@ const ArticleContent = styled.div`
     display: block;
   }
 `;
+
+// JSONファイルを一括取得
+function importAllJson(r) {
+  return r.keys().map(key => {
+    const data = r(key);
+    return {
       id: data.id || data.slug || key.replace(/^.*[/]/, '').replace(/\.json$/, ''),
       ...data
     };
