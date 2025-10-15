@@ -63,25 +63,7 @@ const BlogExcerpt = styled.p`
   font-size: 0.9rem;
   line-height: 1.5;
 `;
-const CategoryHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: ${theme.spacing.medium};
-`;
-const CategoryIcon = styled.div`
-  color: ${theme.colors.primary};
-  font-size: 2.5rem;
-  margin-bottom: 0.5em;
-`;
-const CategoryTitle = styled.h2`
-  font-family: ${theme.font.family};
-  font-weight: ${theme.font.weightBold};
-  color: ${theme.colors.primary};
-  font-size: 1.5rem;
-  margin: 0;
-  text-align: center;
-`;
+
 
 const categories = [
   { key: 'domestic', label: '国内旅行', cmsName: '国内旅行', icon: <FaMapMarkerAlt /> },
