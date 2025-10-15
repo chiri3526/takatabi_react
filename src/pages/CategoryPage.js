@@ -166,7 +166,15 @@ const CategoryPage = ({ category }) => {
           >
             <BlogCard>
               <BlogImage
-                src={post.image}
+                src={
+                  post.image
+                    ? typeof post.image === 'string'
+                      ? post.image.startsWith('/')
+                        ? post.image
+                        : `/${post.image}`
+                      : post.image.url // microCMS形式
+                    : '/sample-images/no-image.jpg'
+                }
                 alt={post.title}
                 onError={(e) => {
                   e.target.src = '/sample-images/no-image.jpg';
