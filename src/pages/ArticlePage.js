@@ -28,53 +28,61 @@ const TocContainer = styled.nav`
     padding: 0.7em 0.7em;
   }
 `;
-const TocList = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-`;
-const TocItem = styled.li`
-  margin: 0.2em 0 0.2em 0.5em;
-  &.toc-h3 { margin-left: 1.5em; font-size: 0.95em; }
-  @media (max-width: 600px) {
-    &.toc-h3 { margin-left: 1em; font-size: 0.9em; }
+const ArticleContent = styled.div`
+  color: ${theme.colors.text};
+  font-size: 1.1rem;
+  line-height: 1.8;
+  font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.5rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.2rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+  img {
+    border-radius: 16px;
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.2em 0;
+    display: block;
   }
 `;
-const TocLink = styled.a`
-  color: #2E7D32;
-  text-decoration: none;
-  &:hover { text-decoration: underline; color: #1B5E20; }
-`;
-
-function generateTocAndContent(html) {
-  if (!html) return { toc: [], html };
-  let idx = 0;
-  const toc = [];
-  // h2/h3タグにidを付与しつつtoc配列を作る
-  let newHtml = html.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/g, (match, tag, attrs, text) => {
-    const cleanText = text.replace(/<[^>]+>/g, '');
-    const id = `heading-${tag}-${idx++}`;
-    toc.push({ tag, text: cleanText, id });
-    return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
-  });
-  // imgタグのsrcが/contents/で始まる場合、絶対パスに補正し、スタイルを追加
-  newHtml = newHtml.replace(/<img([^>]*?)src=["'](\/contents\/[^"'>]+)["']([^>]*)>/g, (match, before, src, after) => {
-    // 画像に基本的なスタイルを適用
-    const style = 'style="width: 100%; max-width: 600px; height: auto; border-radius: 8px; margin: 1em auto; display: block; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"';
-    // publicディレクトリの画像へのパスを確実にする
-    const publicUrl = process.env.PUBLIC_URL || '';
-    const fullSrc = `${publicUrl}${src}`;
-    return `<img${before}src="${fullSrc}"${after} ${style}>`;
-  });
-  return { toc, html: newHtml };
-}
-
-// JSONファイルを一括取得
-function importAllJson(r) {
-  return r.keys().map(key => {
-    const data = r(key);
-    // idがなければslugやファイル名から補完
-    return {
       id: data.id || data.slug || key.replace(/^.*[/]/, '').replace(/\.json$/, ''),
       ...data
     };
@@ -124,53 +132,6 @@ const ArticleImageEyeCatch = styled.img`
   box-shadow: 0 2px 8px rgba(0,0,0,0.13);
   background: #fff;
   margin-bottom: 1.5em;
-`;
-const ArticleContent = styled.div`
-  color: ${theme.colors.text};
-  font-size: 0.85rem;
-  line-height: 1.7;
-  font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
-
-  h2 {
-    color: ${theme.colors.primary};
-    font-size: 1.2rem;
-    border-left: 7px solid ${theme.colors.primary};
-    border-radius: 0 12px 12px 0;
-    padding-left: 0.7em;
-    margin: 2em 0 1em 0;
-    font-weight: bold;
-    background: #f6fff6;
-    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
-  }
-  h3 {
-    color: ${theme.colors.secondary};
-    font-size: 1.1rem;
-    margin: 1.5em 0 0.7em 0;
-    font-weight: bold;
-    border-left: 5px solid ${theme.colors.secondary};
-    border-radius: 0 10px 10px 0;
-    padding-left: 0.6em;
-    background: #eaffea;
-    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
-  }
-  h4 {
-    color: ${theme.colors.accent};
-    font-size: 1.0rem;
-    margin: 1.2em 0 0.5em 0;
-    font-weight: bold;
-    border-left: 4px dashed ${theme.colors.accent};
-    border-radius: 0 8px 8px 0;
-    padding-left: 0.5em;
-    background: #f9fff6;
-    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
-  }
-  strong, .em {
-    color: ${theme.colors.highlight};
-    background: #fffbe6;
-    font-weight: bold;
-    padding: 0 0.2em;
-    border-radius: 4px;
-  }
 `;
 const BackLink = styled(Link)`
   display: inline-flex;
