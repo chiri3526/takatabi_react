@@ -1,3 +1,36 @@
+// 目次生成関数
+function generateTocAndContent(html) {
+  if (!html) return { toc: [], html };
+  let idx = 0;
+  const toc = [];
+  // h2/h3タグにidを付与しつつtoc配列を作る
+  let newHtml = html.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/g, (match, tag, attrs, text) => {
+    const cleanText = text.replace(/<[^>]+>/g, '');
+    const id = `heading-${tag}-${idx++}`;
+    toc.push({ tag, text: cleanText, id });
+    return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
+  });
+  // imgタグのsrcが/contents/で始まる場合、絶対パスに補正
+  newHtml = newHtml.replace(/<img([^>]*?)src=["'](\/contents\/[^"'>]+)["']([^>]*)>/g, (match, before, src, after) => {
+    return `<img${before}src="${src}"${after}>`;
+  });
+  return { toc, html: newHtml };
+}
+
+const TocList = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+`;
+const TocItem = styled.li`
+  margin: 0.2em 0 0.2em 0.5em;
+  &.toc-h3 { margin-left: 1.5em; font-size: 0.95em; }
+`;
+const TocLink = styled.a`
+  color: #2E7D32;
+  text-decoration: none;
+  &:hover { text-decoration: underline; color: #1B5E20; }
+`;
 import React, { useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
