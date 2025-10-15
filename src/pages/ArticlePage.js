@@ -1,3 +1,14 @@
+
+import React, { useEffect, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import styled from '@emotion/styled';
+import { theme } from '../styles/theme';
+import { FaLink, FaArrowLeft } from 'react-icons/fa';
+import article1234 from '../articles/1234';
+import article1235 from '../articles/1235';
+import articleTest from '../articles/test';
+import { fetchArticleById } from '../api/microcms';
+
 // 目次生成関数
 function generateTocAndContent(html) {
   if (!html) return { toc: [], html };
@@ -31,17 +42,6 @@ const TocLink = styled.a`
   text-decoration: none;
   &:hover { text-decoration: underline; color: #1B5E20; }
 `;
-
-
-import React, { useEffect, useRef, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import styled from '@emotion/styled';
-import { theme } from '../styles/theme';
-import { FaLink, FaArrowLeft } from 'react-icons/fa';
-import article1234 from '../articles/1234';
-import article1235 from '../articles/1235';
-import articleTest from '../articles/test';
-import { fetchArticleById } from '../api/microcms';
 
 
 // 目次(Toc)コンポーネント
