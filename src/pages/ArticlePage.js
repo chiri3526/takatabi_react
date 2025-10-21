@@ -109,32 +109,41 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像を大きく表示するスタイル */
+  /* 本文内画像をより大きく表示するスタイル（改訂） */
   img {
     border-radius: 16px;
-    /* デフォルトはコンテナ幅より左右に少し拡張して大きく見せる */
-    width: calc(100% + 64px);
+    /* デスクトップではコンテナ幅よりかなり広げて大きく見せる */
+    width: calc(100% + 120px);
     max-width: none;
     height: auto;
     object-fit: cover;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    margin: 1.6em -32px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+    margin: 2em -60px;
     display: block;
   }
 
-  /* タブレットで少し控えめに */
+  /* タブレットで控えめに拡張 */
   @media (max-width: 900px) {
     img {
-      width: calc(100% + 32px);
-      margin: 1.4em -16px;
+      width: calc(100% + 80px);
+      margin: 1.6em -40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
   }
 
-  /* モバイルではコンテナ幅に合わせて左右余白を戻す */
+  /* モバイルでも通常のコンテナより少し広げて目立たせる */
   @media (max-width: 600px) {
+    font-size: 1.16rem; /* フォントを大きくして読みやすくする */
+    line-height: 1.95;
+
+    h2 { font-size: 1.45rem; padding-left: 0.6em; margin: 1.6em 0 0.8em 0; }
+    h3 { font-size: 1.18rem; padding-left: 0.55em; margin: 1.2em 0 0.6em 0; }
+    h4 { font-size: 1.02rem; padding-left: 0.45em; }
+
     img {
-      width: 100%;
-      margin: 1.2em 0;
+      /* モバイルでは左右を少しはみ出させるが画面幅を超えない程度に */
+      width: calc(100% + 32px);
+      margin: 1.2em -16px;
       border-radius: 12px;
     }
   }
