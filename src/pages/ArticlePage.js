@@ -72,9 +72,20 @@ function generateTocAndContent(html) {
     if (/class=/.test(cleaned)) {
       cleaned = cleaned.replace(/class=("|')(.*?)("|')/i, (m, q, cls) => `class=${q}${cls} cms-image${q}`);
     } else {
-      cleaned = `${cleaned} class="cms-image"`;
+      cleaned = `${cleaned} class=\"cms-image\"`;
     }
     return `<img${cleaned}>`;
+  });
+
+  // --- 追加: Google Maps のリンクを短いラベルに置換して target/rel を付与 ---
+  // 例: <a href="https://www.google.com/maps/place/...">長いURL</a> や maps.app.goo.gl を
+  // <a class="map-link" href="..." target="_blank" rel="noopener noreferrer">📍 Googleマップで見る</a> に置換
+  newHtml = newHtml.replace(/<a([^>]*href=["']([^"']*(?:google\.com\/maps|maps\.app\.goo\.gl)[^"']*)["'][^>]*)>(.*?)<\/a>/gi, (match, attrs, href, inner) => {
+    // attrs 内に target や rel があれば除去してから付与
+    let cleaned = attrs.replace(/\s*target=["'][^"']*["']/gi, '');
+    cleaned = cleaned.replace(/\s*rel=["'][^"']*["']/gi, '');
+    // map-link クラスのアンカータグを返す（スタイリングは ArticleContent 内で行う）
+    return `<a class="map-link" href="${href}" target="_blank" rel="noopener noreferrer">📍 Googleマップで見る</a>`;
   });
 
   return { toc, html: newHtml };
@@ -120,6 +131,33 @@ const ArticleContent = styled.div`
   font-size: 1.0rem; /* 基本フォントを小さめに調整 */
   line-height: 1.7;
   font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+
+  /* 本文内リンクの折り返しと最大幅制御 */
+  a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  /* Googleマップリンクの見た目をボタン風に整える */
+  .map-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    background: #e8f5e9;
+    color: #1b5e20;
+    padding: 0.35em 0.6em;
+    border-radius: 8px;
+    border: 1px solid #c8e6c9;
+    text-decoration: none;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(27,94,32,0.08);
+  }
+
+  .map-link:hover {
+    background: #d0efd3;
+  }
 
   h2 {
     color: ${theme.colors.primary};

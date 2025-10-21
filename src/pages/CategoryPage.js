@@ -84,48 +84,8 @@ function importAllJson(r) {
 const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
 
 const blogPosts = [
-  ...jsonArticles,
-  // 既存のjs記事
-  {
-    id: 1234,
-    title: "京都の隠れた観光スポット",
-    excerpt: "古都京都の知られざる名所を巡る旅。地元の人々に愛される場所をご紹介します。",
-    image: require('../contents/photo/kyoto.jpg'),
-    slug: "1234",
-    category: "domestic"
-  },
-  {
-    id: 1235,
-    title: "沖縄離島めぐり",
-    excerpt: "エメラルドグリーンの海と白い砂浜、のんびりとした島時間を過ごす旅。",
-    image: require('../contents/photo/okinawa.jpg'),
-    slug: "1235",
-    category: "domestic"
-  },
-  {
-    id: 2001,
-    title: "パリの美術館巡り",
-    excerpt: "芸術の都パリで有名美術館を巡る旅。ルーブルやオルセーの魅力を紹介。",
-    image: require('../contents/photo/kyoto.jpg'),
-    slug: "2001",
-    category: "overseas"
-  },
-  {
-    id: 3001,
-    title: "羽田空港ラウンジ体験記",
-    excerpt: "羽田空港のラウンジで過ごす快適なひととき。サービスや雰囲気をレポート。",
-    image: require('../contents/photo/okinawa.jpg'),
-    slug: "3001",
-    category: "lounge"
-  },
-  {
-    id: 4001,
-    title: "新幹線グリーン車の旅",
-    excerpt: "快適な新幹線グリーン車での移動体験。車内サービスや座席の様子を紹介。",
-    image: require('../contents/photo/kyoto.jpg'),
-    slug: "4001",
-    category: "train"
-  }
+  ...jsonArticles
+  // 既存のハードコード記事は削除しました。必要ならここに追加してください。
 ];
 
 const CategoryPage = ({ category }) => {
