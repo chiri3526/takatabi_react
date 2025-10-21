@@ -24,6 +24,21 @@ function generateTocAndContent(html) {
   newHtml = newHtml.replace(/<img([^>]*?)src=["'](\/contents\/[^"'>]+)["']([^>]*)>/g, (match, before, src, after) => {
     return `<img${before}src="${src}"${after}>`;
   });
+
+  // --- 追加: img の inline 属性(width/height/style) を削除し class="cms-image" を付与 ---
+  newHtml = newHtml.replace(/<img([^>]*)>/g, (match, attrs) => {
+    // attrs 部から width, height, style を削除
+    let cleaned = attrs.replace(/\s*(width|height)=["'][^"']*["']/gi, '');
+    cleaned = cleaned.replace(/\s*style=["'][^"']*["']/gi, '');
+    // class があれば追記、なければ追加
+    if (/class=/.test(cleaned)) {
+      cleaned = cleaned.replace(/class=(\"|')(.*?)(\"|')/i, (m, q, cls) => `class=${q}${cls} cms-image${q}`);
+    } else {
+      cleaned = `${cleaned} class=\"cms-image\"`;
+    }
+    return `<img${cleaned}>`;
+  });
+
   return { toc, html: newHtml };
 }
 
@@ -109,37 +124,31 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をより大きく表示するスタイル（改訂） */
-  img {
+  /* 本文内画像を大きく表示するスタイル */
+  img,
+  .cms-image {
     border-radius: 16px;
-    /* デスクトップではコンテナ幅よりかなり広げて大きく見せる */
-    width: calc(100% + 120px);
-    max-width: none;
-    height: auto;
+    /* デフォルトはコンテナ幅より左右に少し拡張して大きく見せる */
+    width: calc(100% + 120px) !important;
+    max-width: none !important;
+    height: auto !important;
     object-fit: cover;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.09);
-    margin: 2em -60px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em -32px;
     display: block;
   }
 
-  /* タブレットで控えめに拡張 */
+  /* タブレットで少し控えめに */
   @media (max-width: 900px) {
-    img {
-      width: calc(100% + 80px);
-      margin: 1.6em -40px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
     }
   }
 
-  /* モバイルでも通常のコンテナより少し広げて目立たせる */
+  /* モバイルではコンテナ幅に合わせて左右余白を戻す */
   @media (max-width: 600px) {
-    font-size: 1.16rem; /* フォントを大きくして読みやすくする */
-    line-height: 1.95;
-
-    h2 { font-size: 1.45rem; padding-left: 0.6em; margin: 1.6em 0 0.8em 0; }
-    h3 { font-size: 1.18rem; padding-left: 0.55em; margin: 1.2em 0 0.6em 0; }
-    h4 { font-size: 1.02rem; padding-left: 0.45em; }
-
     img {
       /* モバイルでは左右を少しはみ出させるが画面幅を超えない程度に */
       width: calc(100% + 32px);
@@ -148,9 +157,10 @@ const ArticleContent = styled.div`
     }
   }
 `;
-
+    img,
+    .cms-image {
 // JSONファイルを一括取得
-function importAllJson(r) {
+      width: calc(100% + 32px) !important;
   return r.keys().map(key => {
     const data = r(key);
     return {
