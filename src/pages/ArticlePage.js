@@ -301,20 +301,26 @@ const ArticlePage = (props) => {
   useAdsenseScript();
   const adRef = useRef(null);
   const id = props.id;
-  const [cmsArticle, setCmsArticle] = React.useState(null);
+  // undefined = 未取得（loading）、object = 取得済、 null = 取得失敗（見つからない）
+  const [cmsArticle, setCmsArticle] = React.useState(undefined);
   const post = useMemo(() => {
     // まずローカル記事を探す
     const local = blogPosts.find(p => p.slug === id || p.id === id);
     if (local) return local;
-    // microCMS記事（APIで取得）
+    // ローカルに無ければ microCMS記事（APIで取得結果）を返す
     return cmsArticle;
   }, [id, cmsArticle]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // ローカル記事がなければmicroCMS APIで取得
-    if (!blogPosts.find(p => p.slug === id || p.id === id)) {
+    // ローカル記事がなければmicroCMS APIで取得（未取得フラグをセット）
+    const local = blogPosts.find(p => p.slug === id || p.id === id);
+    if (!local) {
+      setCmsArticle(undefined); // loading
       fetchArticleById(id).then(data => setCmsArticle(data)).catch(() => setCmsArticle(null));
+    } else {
+      // ローカル記事がある場合は CMS 側の状態をクリア
+      setCmsArticle(null);
     }
   }, [id]);
 
@@ -331,7 +337,14 @@ const ArticlePage = (props) => {
   // 関連記事（同じカテゴリで自分以外）
   const related = blogPosts.filter(p => p.category === post?.category && p.slug !== id);
 
+  // ローカル記事もなく、まだ CMS からの取得が終わっていない場合は何も表示しない（フラッシュ防止）
+  const hasLocal = blogPosts.find(p => p.slug === id || p.id === id);
   if (!post) {
+    if (!hasLocal && cmsArticle === undefined) {
+      // loading: 表示を出さずフラッシュを防止
+      return null;
+    }
+    // 取得済みだが存在しない場合はメッセージ表示
     return <ArticleContainer>記事が見つかりませんでした。</ArticleContainer>;
   }
 

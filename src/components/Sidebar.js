@@ -93,6 +93,7 @@ const categories = [
     id: 1,
     name: '国内旅行',
     slug: 'domestic',
+    /* 詳細分類は一時的に非表示にするためコメントアウト（将来再表示可能）
     children: [
       { id: 11, name: '北海道', slug: 'hokkaido' },
       { id: 12, name: '東北', slug: 'tohoku' },
@@ -105,6 +106,7 @@ const categories = [
       { id: 19, name: '九州', slug: 'kyushu' },
       { id: 20, name: '沖縄', slug: 'okinawa' }
     ]
+    */
   },
   { id: 2, name: '海外旅行', slug: 'overseas' },
   { id: 3, name: 'ラウンジ', slug: 'lounge' },
