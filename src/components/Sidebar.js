@@ -14,7 +14,13 @@ const SidebarContainer = styled.div`
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   transition: left 0.3s ease;
   z-index: 1000;
-  padding-top: 60px;
+  /* ハンバーガーメニューと重ならないようリスト位置を下げる */
+  padding-top: 100px;
+
+  /* モバイル等でコンパクトにしたい場合は少し小さめに */
+  @media (max-width: 480px) {
+    padding-top: 80px;
+  }
 `;
 
 const MenuButton = styled.button`

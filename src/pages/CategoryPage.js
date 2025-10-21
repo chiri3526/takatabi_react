@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
@@ -10,7 +9,8 @@ const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
-  margin-top: ${theme.spacing.large};
+  /* 上は元の余白を保持し、左と下に余白を追加 */
+  margin: ${theme.spacing.large} 0 ${theme.spacing.large} ${theme.spacing.medium};
   color: ${theme.colors.primary};
   text-decoration: none;
   font-weight: bold;
@@ -188,11 +188,9 @@ const CategoryPage = ({ category }) => {
           </Link>
         ))}
       </BlogGrid>
-      <div style={{textAlign:'center'}}>
-        <BackLink to="/">
-          トップページへ戻る
-        </BackLink>
-      </div>
+      <BackLink to="/">
+        トップページへ戻る
+      </BackLink>
     </div>
   );
 };
