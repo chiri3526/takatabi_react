@@ -70,9 +70,9 @@ function generateTocAndContent(html) {
     cleaned = cleaned.replace(/\s*style=["'][^"']*["']/gi, '');
     // class があれば追記、なければ追加
     if (/class=/.test(cleaned)) {
-      cleaned = cleaned.replace(/class=(\"|')(.*?)(\"|')/i, (m, q, cls) => `class=${q}${cls} cms-image${q}`);
+      cleaned = cleaned.replace(/class=("|')(.*?)("|')/i, (m, q, cls) => `class=${q}${cls} cms-image${q}`);
     } else {
-      cleaned = `${cleaned} class=\"cms-image\"`;
+      cleaned = `${cleaned} class="cms-image"`;
     }
     return `<img${cleaned}>`;
   });
