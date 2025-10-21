@@ -160,7 +160,7 @@ const CategoryPage = ({ category }) => {
       <BlogGrid>
         {posts.map(post => (
           <Link
-            to={`/?p=${post.slug}`}
+            to={`/?p=${post.slug || post.id}`}
             key={post.id}
             style={{ textDecoration: 'none' }}
           >
