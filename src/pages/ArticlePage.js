@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
@@ -109,13 +108,35 @@ const ArticleContent = styled.div`
     padding: 0 0.2em;
     border-radius: 4px;
   }
+
+  /* 本文内画像を大きく表示するスタイル */
   img {
     border-radius: 16px;
-    max-width: 100%;
+    /* デフォルトはコンテナ幅より左右に少し拡張して大きく見せる */
+    width: calc(100% + 64px);
+    max-width: none;
     height: auto;
+    object-fit: cover;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    margin: 1.2em 0;
+    margin: 1.6em -32px;
     display: block;
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img {
+      width: calc(100% + 32px);
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルではコンテナ幅に合わせて左右余白を戻す */
+  @media (max-width: 600px) {
+    img {
+      width: 100%;
+      margin: 1.2em 0;
+      border-radius: 12px;
+    }
   }
 `;
 

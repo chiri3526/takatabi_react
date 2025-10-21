@@ -209,7 +209,7 @@ const HomePage = () => {
             <BlogGrid>
               {postsToShow.map(post => (
                 <Link
-                  to={`/?p=${post.slug || post.id}`}
+kijj                  to={`/?p=${post.slug || post.id}`}
                   key={post.id}
                   style={{ textDecoration: 'none' }}
                 >
