@@ -123,7 +123,7 @@ const ArticleContent = styled.div`
 
   h2 {
     color: ${theme.colors.primary};
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     border-left: 7px solid ${theme.colors.primary};
     border-radius: 0 12px 12px 0;
     padding-left: 0.7em;
@@ -134,7 +134,7 @@ const ArticleContent = styled.div`
   }
   h3 {
     color: ${theme.colors.secondary};
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin: 1.5em 0 0.7em 0;
     font-weight: bold;
     border-left: 5px solid ${theme.colors.secondary};
@@ -185,14 +185,17 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルではコンテナ幅に合わせて左右余白を戻す */
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
   @media (max-width: 600px) {
     font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
     img {
-      /* モバイルでは左右を少しはみ出させるが画面幅を超えない程度に */
-      width: calc(100% + 32px);
-      margin: 1.2em -16px;
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
       border-radius: 12px;
+      display: block;
     }
   }
 `;
