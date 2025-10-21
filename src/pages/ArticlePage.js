@@ -79,8 +79,8 @@ const TocContainer = styled.nav`
 `;
 const ArticleContent = styled.div`
   color: ${theme.colors.text};
-  font-size: 1.1rem;
-  line-height: 1.8;
+  font-size: 1.0rem; /* 基本フォントを小さめに調整 */
+  line-height: 1.7;
   font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
 
   h2 {
@@ -149,6 +149,7 @@ const ArticleContent = styled.div`
 
   /* モバイルではコンテナ幅に合わせて左右余白を戻す */
   @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
     img {
       /* モバイルでは左右を少しはみ出させるが画面幅を超えない程度に */
       width: calc(100% + 32px);
@@ -157,40 +158,6 @@ const ArticleContent = styled.div`
     }
   }
 `;
-    img,
-    .cms-image {
-// JSONファイルを一括取得
-      width: calc(100% + 32px) !important;
-  return r.keys().map(key => {
-    const data = r(key);
-    return {
-      id: data.id || data.slug || key.replace(/^.*[/]/, '').replace(/\.json$/, ''),
-      ...data
-    };
-  });
-}
-
-// Google AdSense scriptをheadに挿入（重複防止）
-function useAdsenseScript() {
-  useEffect(() => {
-    if (!document.querySelector('script[src*="adsbygoogle.js?client=ca-pub-7728107798566122"]')) {
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7728107798566122';
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    }
-  }, []);
-}
-
-const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
-
-const blogPosts = [
-  ...jsonArticles,
-  article1234,
-  article1235,
-  articleTest
-];
 
 const ArticleContainer = styled.div`
   max-width: 700px;
