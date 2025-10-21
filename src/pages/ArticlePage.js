@@ -8,6 +8,44 @@ import article1235 from '../articles/1235';
 import articleTest from '../articles/test';
 import { fetchArticleById } from '../api/microcms';
 
+// JSONファイルを一括取得（記事一覧を作るため）
+function importAllJson(r) {
+  return r.keys().map(key => {
+    const data = r(key);
+    return {
+      id: data.id || data.slug || key.replace(/^.*[/]/, '').replace(/\.json$/, ''),
+      ...data
+    };
+  });
+}
+
+const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
+
+// ローカル記事配列（JSON から読み込んだもの + hand-coded modules）
+const blogPosts = [
+  ...jsonArticles,
+  article1234,
+  article1235,
+  articleTest
+];
+
+// Google AdSense script を head に挿入するユーティリティ（重複挿入を防止）
+function useAdsenseScript() {
+  // 実行環境でのみ DOM にスクリプトを挿入
+  try {
+    if (typeof document === 'undefined') return;
+    if (!document.querySelector('script[src*="adsbygoogle.js?client=ca-pub-7728107798566122"]')) {
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7728107798566122';
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+    }
+  } catch (e) {
+    // サーバーサイド環境やテスト環境では無視
+  }
+}
+
 // 目次生成関数
 function generateTocAndContent(html) {
   if (!html) return { toc: [], html };
