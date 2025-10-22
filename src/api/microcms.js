@@ -5,7 +5,7 @@ const API_KEY = "XORpbhOgeA9qtFwBytkGmADyVCRakRGwtAnE";
 
 export const fetchArticles = async () => {
   const res = await axios.get(
-    `https://${SERVICE_DOMAIN}.microcms.io/api/v1/articles`,
+    `https://${SERVICE_DOMAIN}.microcms.io/api/v1/articles?limit=20`,
     {
       headers: { "X-API-KEY": API_KEY },
     }

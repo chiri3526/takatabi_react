@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import takatabi1 from '../contents/LP/takatabi1.png';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
@@ -64,6 +65,23 @@ const BlogExcerpt = styled.p`
   line-height: 1.5;
 `;
 
+const TopLogo = styled.div`
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0;
+
+  img {
+    width: 50%;
+    height: 70px;
+    border-radius: 0;
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
+  }
+`;
+
 
 const categories = [
   { key: 'domestic', label: '国内旅行', cmsName: '国内旅行', icon: <FaMapMarkerAlt /> },
@@ -97,26 +115,21 @@ const CategoryPage = ({ category }) => {
         setCmsArticles(data.contents);
       }
     });
-  }, []);
+  }, [category]);
 
   const cat = categories.find(c => c.key === category);
-  // microCMS記事とローカル記事を統合
-  const posts = [
-    ...cmsArticles.filter(post => {
-      if (post.category && typeof post.category === 'object') {
-        return post.category.name === cat.cmsName;
-      }
-      return post.category === category;
-    }),
-    ...blogPosts.filter(post => post.category === category && !cmsArticles.some(cms => {
-      if (cms.category && typeof cms.category === 'object') {
-        return cms.category.name === cat.cmsName;
-      }
-      return cms.category === category;
-    }))
-  ];
+  // microCMS記事のみ表示
+  const posts = cmsArticles.filter(post => {
+    if (post.category && typeof post.category === 'object') {
+      return post.category.name === cat.cmsName;
+    }
+    return post.category === category;
+  });
   return (
     <div>
+      <TopLogo>
+        <img src={takatabi1} alt="takatabi" style={{width:'50%', height:'70px', borderRadius:'0'}} />
+      </TopLogo>
       <BlogGrid>
         {posts.map(post => (
           <Link
