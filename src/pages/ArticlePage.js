@@ -3,9 +3,6 @@ import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '../styles/theme';
 import { FaLink, FaArrowLeft } from 'react-icons/fa';
-import article1234 from '../articles/1234';
-import article1235 from '../articles/1235';
-import articleTest from '../articles/test';
 import { fetchArticleById } from '../api/microcms';
 
 // JSONファイルを一括取得（記事一覧を作るため）
@@ -21,13 +18,12 @@ function importAllJson(r) {
 
 const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
 
-// ローカル記事配列（JSON から読み込んだもの + hand-coded modules）
+// blogPosts: HomePage/CategoryPageと同じローカル記事配列を定義
 const blogPosts = [
-  ...jsonArticles,
-  article1234,
-  article1235,
-  articleTest
+  ...jsonArticles
+  // 必要ならここにjs記事やテスト記事を追加可能
 ];
+
 
 // Google AdSense script を head に挿入するユーティリティ（重複挿入を防止）
 function useAdsenseScript() {
@@ -181,18 +177,19 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像を大きく表示するスタイル */
+  /* 本文内画像をコンテナ内に収める */
   img,
   .cms-image {
     border-radius: 16px;
-    /* デフォルトはコンテナ幅より左右に少し拡張して大きく見せる */
-    width: calc(100% + 120px) !important;
-    max-width: none !important;
+    width: 100% !important;
+    max-width: 700px !important;
     height: auto !important;
-    object-fit: cover;
+    object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    margin: 1.6em -32px;
+    margin: 1.6em auto;
     display: block;
+    background: #fff;
+    padding: 8px;
   }
 
   /* タブレットで少し控えめに */
@@ -220,12 +217,19 @@ const ArticleContent = styled.div`
 `;
 
 const ArticleContainer = styled.div`
-  max-width: 700px;
+  width: 70vw;
+  max-width: 1100px;
+  min-width: 320px;
   margin: 40px auto;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   padding: ${theme.spacing.xlarge};
+  @media (max-width: 900px) {
+    width: 90vw;
+    max-width: 98vw;
+    padding: ${theme.spacing.large};
+  }
 `;
 const ArticleTitle = styled.h1`
   font-size: 1.2rem; // 小さめに変更
@@ -322,6 +326,9 @@ const ArticlePage = (props) => {
   const id = props.id;
   // undefined = 未取得（loading）、object = 取得済、 null = 取得失敗（見つからない）
   const [cmsArticle, setCmsArticle] = React.useState(undefined);
+  // アイキャッチ画像の縦横判定フックは必ず呼ぶ
+  const [isVertical, setIsVertical] = React.useState(false);
+  // postはuseMemoで取得されるため、imageUrlは毎回計算
   const post = useMemo(() => {
     // まずローカル記事を探す
     const local = blogPosts.find(p => p.slug === id || p.id === id);
@@ -329,6 +336,23 @@ const ArticlePage = (props) => {
     // ローカルに無ければ microCMS記事（APIで取得結果）を返す
     return cmsArticle;
   }, [id, cmsArticle]);
+  const imageUrl = post?.image?.url || post?.image;
+  React.useEffect(() => {
+    // フックは必ず呼ばれる（条件分岐なし）
+    if (!imageUrl) {
+      setIsVertical(false);
+      return;
+    }
+    const img = new window.Image();
+    img.src = imageUrl;
+    img.onload = function() {
+      if (img.naturalHeight > img.naturalWidth * 1.15) {
+        setIsVertical(true);
+      } else {
+        setIsVertical(false);
+      }
+    };
+  }, [imageUrl]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -353,8 +377,18 @@ const ArticlePage = (props) => {
   }, [id]);
   // 目次とid付きHTML生成
   const { toc, html: contentWithIds } = useMemo(() => generateTocAndContent(post?.content), [post]);
-  // 関連記事（同じカテゴリで自分以外）
-  const related = blogPosts.filter(p => p.category === post?.category && p.slug !== id);
+  // microCMS記事でも関連記事を表示（ローカル+CMS両方から抽出）
+  const allArticles = [...blogPosts];
+  if (cmsArticle && cmsArticle.id && !allArticles.some(p => p.id === cmsArticle.id)) {
+    allArticles.push(cmsArticle);
+  }
+  // slugとidの型違い・不一致を吸収して関連記事を抽出
+  const postSlug = post?.slug ? String(post.slug) : String(post?.id);
+  const related = allArticles.filter(p => {
+    const pSlug = p.slug ? String(p.slug) : String(p.id);
+    // カテゴリ一致かつ自分以外
+    return p.category === post?.category && pSlug !== postSlug;
+  });
 
   // ローカル記事もなく、まだ CMS からの取得が終わっていない場合は何も表示しない（フラッシュ防止）
   const hasLocal = blogPosts.find(p => p.slug === id || p.id === id);
@@ -367,8 +401,6 @@ const ArticlePage = (props) => {
     return <ArticleContainer>記事が見つかりませんでした。</ArticleContainer>;
   }
 
-  // アイキャッチ画像
-  const imageUrl = post.image?.url || post.image;
 
   return (
     <>
@@ -376,7 +408,7 @@ const ArticlePage = (props) => {
       <ArticleContainer>
         <ArticleTitle>{post.title}</ArticleTitle>
         <div style={{display:'flex', justifyContent:'center'}}>
-          <ArticleImageEyeCatch src={imageUrl} alt={post.title} />
+          <ArticleImageEyeCatch src={imageUrl} alt={post.title} className={isVertical ? 'vertical' : ''} />
         </div>
         {/* 目次 */}
         {toc.length > 0 && (
@@ -407,12 +439,15 @@ const ArticlePage = (props) => {
           <RelatedSection>
             <RelatedTitle><FaLink /> 関連ページ</RelatedTitle>
             <RelatedList>
-              {related.map(r => (
-                <RelatedCard to={`/?p=${r.slug}`} key={r.slug}>
-                  <RelatedImage style={{borderRadius:'18px', width:'90px', height:'90px', objectFit:'cover', marginBottom:'0.7em'}} src={r.image} alt={r.title} />
-                  <RelatedCardTitle>{r.title}</RelatedCardTitle>
-                </RelatedCard>
-              ))}
+              {related.map(r => {
+                const relImg = r.image?.url || r.image;
+                return (
+                  <RelatedCard to={`/?p=${r.slug}`} key={r.slug}>
+                    <RelatedImage src={relImg} alt={r.title} />
+                    <RelatedCardTitle>{r.title}</RelatedCardTitle>
+                  </RelatedCard>
+                );
+              })}
             </RelatedList>
           </RelatedSection>
         )}

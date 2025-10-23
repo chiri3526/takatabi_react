@@ -82,24 +82,8 @@ function importAllJson(r) {
 const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
 
 const blogPosts = [
-  ...jsonArticles,
-  // 既存のjs記事
-  {
-    id: 1234,
-    title: "京都の隠れた観光スポット",
-    excerpt: "古都京都の知られざる名所を巡る旅。地元の人々に愛される場所をご紹介します。",
-    image: require('../contents/photo/kyoto.jpg'),
-    slug: "1234",
-    category: "domestic"
-  },
-  {
-    id: 1235,
-    title: "沖縄離島めぐり",
-    excerpt: "エメラルドグリーンの海と白い砂浜、のんびりとした島時間を過ごす旅。",
-    image: require('../contents/photo/okinawa.jpg'),
-    slug: "1235",
-    category: "domestic"
-  },
+  ...jsonArticles.filter(a => a.slug !== "1240" && a.id !== 1235),
+  // 既存のjs記事（不要なもの除外）
   {
     id: 2001,
     title: "パリの美術館巡り",
@@ -108,32 +92,21 @@ const blogPosts = [
     slug: "2001",
     category: "overseas"
   },
-  {
-    id: 3001,
-    title: "羽田空港ラウンジ体験��",
-    excerpt: "羽田空港のラウンジで過ごす快適なひととき。サービスや雰囲気をレポート。",
-    image: require('../contents/photo/okinawa.jpg'),
-    slug: "3001",
-    category: "lounge"
-  },
-  {
-    id: 4001,
-    title: "新幹線グリーン車の旅",
-    excerpt: "快適な新幹線グリーン車での移動体験。車内サービスや座席の様子を紹介。",
-    image: require('../contents/photo/kyoto.jpg'),
-    slug: "4001",
-    category: "train"
-  },
-  articleTest,
-  // テスト用に追加の記事データ
-  ...Array(18).fill(null).map((_, index) => ({
-    id: 1236 + index,
-    title: `旅行記事 ${index + 6}`,
-    excerpt: "記事の説明文がここに入ります。",
-    image: index % 2 === 0 ? require('../contents/photo/kyoto.jpg') : require('../contents/photo/okinawa.jpg'),
-    slug: `${1236 + index}`,
-    category: ["domestic", "overseas", "lounge", "train"][index % 4]
-  }))
+  // ...existing code...
+  // テスト用に追加の記事データ（slug:1234, articleTestは除外）
+  ...Array(18).fill(null).map((_, index) => {
+    const id = 1236 + index;
+    // 旅行記事6,8,9（id:1241,1243,1244）は除外
+    if ([1241,1243,1244].includes(id)) return null;
+    return {
+      id,
+      title: `旅行記事 ${index + 6}`,
+      excerpt: "記事の説明文がここに入ります。",
+      image: index % 2 === 0 ? require('../contents/photo/kyoto.jpg') : require('../contents/photo/okinawa.jpg'),
+      slug: `${id}`,
+      category: ["domestic", "overseas", "lounge", "train"][index % 4]
+    };
+  }).filter(Boolean)
 ];
 
 // 4区画レイアウト用のスタイル
@@ -180,26 +153,21 @@ const HomePage = () => {
     });
   }, []);
 
-  // 既存記事（ローカル）
-  const otherArticles = blogPosts.filter(post => !cmsArticles.some(cms => cms.id === post.id));
-
+  // microCMS記事のみ表示
   return (
     <>
       <TopLogo>
         <img src={takatabi1} alt="takatabi" style={{width:'50%', height:'70px', borderRadius:'0'}} />
       </TopLogo>
       {categories.map(cat => {
-        // microCMS記事を優先
+        // microCMS記事のみ抽出
         const cmsForCat = cmsArticles.filter(post => {
-          // microCMS記事のcategoryはオブジェクト
           if (post.category && typeof post.category === 'object') {
             return post.category.name === cat.cmsName;
           }
-          // 旧形式（文字列）
           return post.category === cat.key;
         });
-        const otherForCat = otherArticles.filter(post => post.category === cat.key);
-        const postsToShow = [...cmsForCat, ...otherForCat].slice(0, 4);
+        const postsToShow = cmsForCat.slice(0, 4);
         return (
           <CategorySection key={cat.key}>
             <CategoryHeader>
@@ -209,7 +177,7 @@ const HomePage = () => {
             <BlogGrid>
               {postsToShow.map(post => (
                 <Link
-kijj                  to={`/?p=${post.slug || post.id}`}
+                  to={`/?p=${post.slug || post.id}`}
                   key={post.id}
                   style={{ textDecoration: 'none' }}
                 >
