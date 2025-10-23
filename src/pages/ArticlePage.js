@@ -292,44 +292,48 @@ const RelatedCard = styled(Link)`
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: 420px;
+  width: 520px; /* 横幅を広げる */
   max-width: calc(100% - 40px);
+  min-height: 130px; /* 縦に少し広げる */
   background: #f6fff6;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
   text-decoration: none;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, transform 0.12s;
   border: 2px solid ${theme.colors.primary}22;
-  padding: 0.6em;
-  gap: 0.8em;
+  padding: 0.9em;
+  gap: 1em;
   &:hover {
-    box-shadow: 0 6px 20px rgba(0,128,64,0.13);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 28px rgba(0,128,64,0.14);
     border-color: ${theme.colors.primary};
+  }
+  @media (max-width: 900px) {
+    width: calc(100% - 48px);
   }
   @media (max-width: 600px) {
     width: calc(100% - 32px);
-    padding: 0.5em;
+    padding: 0.6em;
+    min-height: 110px;
   }
 `;
 const RelatedImage = styled.img`
-  width: 38%;
+  width: 44%; /* 画像幅を大きくして目立たせる */
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 12px;
   margin: 0;
   flex-shrink: 0;
 `;
 const RelatedCardTitle = styled.div`
   color: ${theme.colors.primary};
-  font-weight: bold;
-  font-size: 1.05rem;
+  font-weight: 700;
+  font-size: 1rem; /* 少し大きくして読みやすく */
   text-align: left;
   margin: 0;
-  line-height: 1.2;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  line-height: 1.25;
+  word-break: break-word; /* 長い単語を折り返す */
+  white-space: normal; /* 折り返し許可 */
 `;
 
 const ArticlePage = (props) => {
