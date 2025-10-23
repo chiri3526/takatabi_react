@@ -6,7 +6,6 @@ import { theme } from '../styles/theme';
 import { fetchArticles } from '../api/microcms';
 
 import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain } from 'react-icons/fa';
-import articleTest from '../articles/test';
 
 const TopLogo = styled.div`
   width: 100%;
@@ -67,71 +66,8 @@ const BlogExcerpt = styled.p`
   line-height: 1.5;
 `;
 
-// JSONファイルを一括取得
-function importAllJson(r) {
-  return r.keys().map(key => {
-    const data = r(key);
-    // idがなければslugやファイル名から補完
-    return {
-      id: data.id || data.slug || key.replace(/^.*[/]/, '').replace(/\.json$/, ''),
-      ...data
-    };
-  });
-}
-
-const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
-
-const blogPosts = [
-  ...jsonArticles.filter(a => a.slug !== "1240" && a.id !== 1235),
-  // 既存のjs記事（不要なもの除外）
-  {
-    id: 2001,
-    title: "パリの美術館巡り",
-    excerpt: "芸術の都パリで���名美術館を巡る旅。ルーブルやオルセーの魅力を紹介。",
-    image: require('../contents/photo/kyoto.jpg'),
-    slug: "2001",
-    category: "overseas"
-  },
-  // ...existing code...
-  // テスト用に追加の記事データ（slug:1234, articleTestは除外）
-  ...Array(18).fill(null).map((_, index) => {
-    const id = 1236 + index;
-    // 旅行記事6,8,9（id:1241,1243,1244）は除外
-    if ([1241,1243,1244].includes(id)) return null;
-    return {
-      id,
-      title: `旅行記事 ${index + 6}`,
-      excerpt: "記事の説明文がここに入ります。",
-      image: index % 2 === 0 ? require('../contents/photo/kyoto.jpg') : require('../contents/photo/okinawa.jpg'),
-      slug: `${id}`,
-      category: ["domestic", "overseas", "lounge", "train"][index % 4]
-    };
-  }).filter(Boolean)
-];
-
-// 4区画レイアウト用のスタイル
-const CategorySection = styled.section`
-  margin-bottom: ${theme.spacing.xlarge};
-`;
-const CategoryHeader = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: ${theme.spacing.medium};
-`;
-const CategoryIcon = styled.div`
-  color: ${theme.colors.primary};
-  font-size: 2.5rem;
-  margin-bottom: 0.5em;
-`;
-const CategoryTitle = styled.h2`
-  font-family: ${theme.font.family};
-  font-weight: ${theme.font.weightBold};
-  color: ${theme.colors.primary};
-  font-size: 1.5rem;
-  margin: 0;
-  text-align: center;
-`;
+// ローカルのJSON記事は現在トップ表示に使用していないため除外しています。
+// 必要ならここにローカル記事を追加してください。
 
 const categories = [
   { key: 'domestic', label: '国内旅行', cmsName: '国内旅行', icon: <FaMapMarkerAlt /> },

@@ -68,7 +68,7 @@ function generateTocAndContent(html) {
     if (/class=/.test(cleaned)) {
       cleaned = cleaned.replace(/class=("|')(.*?)("|')/i, (m, q, cls) => `class=${q}${cls} cms-image${q}`);
     } else {
-      cleaned = `${cleaned} class=\"cms-image\"`;
+      cleaned = `${cleaned} class="cms-image"`;
     }
     return `<img${cleaned}>`;
   });
@@ -81,7 +81,7 @@ function generateTocAndContent(html) {
     let cleaned = attrs.replace(/\s*target=["'][^"']*["']/gi, '');
     cleaned = cleaned.replace(/\s*rel=["'][^"']*["']/gi, '');
     // 最終的な anchor を返す
-    return `<a${cleaned} target=\"_blank\" rel=\"noopener noreferrer\">📍 Googleマップ</a>`;
+    return `<a${cleaned} target="_blank" rel="noopener noreferrer">📍 Googleマップ</a>`;
   });
 
   return { toc, html: newHtml };

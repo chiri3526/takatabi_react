@@ -99,12 +99,8 @@ function importAllJson(r) {
     };
   });
 }
-const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
-
-const blogPosts = [
-  ...jsonArticles
-  // 既存のハードコード記事は削除しました。必要ならここに追加してください。
-];
+// ローカルの JSON 記事はこのページでは使用していないため読み込みを省略しています。
+// 必要な場合は importAllJson を使って読み込んでください。
 
 const CategoryPage = ({ category }) => {
   const [cmsArticles, setCmsArticles] = useState([]);
