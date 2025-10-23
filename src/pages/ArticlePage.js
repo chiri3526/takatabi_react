@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '../styles/theme';
 import { FaLink, FaArrowLeft } from 'react-icons/fa';
-import { fetchArticleById } from '../api/microcms';
+import { fetchArticleById, fetchArticles } from '../api/microcms';
 
 // JSONファイルを一括取得（記事一覧を作るため）
 function importAllJson(r) {
@@ -326,6 +326,8 @@ const ArticlePage = (props) => {
   const id = props.id;
   // undefined = 未取得（loading）、object = 取得済、 null = 取得失敗（見つからない）
   const [cmsArticle, setCmsArticle] = React.useState(undefined);
+  // microCMS の記事リスト（関連記事抽出用）
+  const [cmsArticlesList, setCmsArticlesList] = React.useState([]);
   // アイキャッチ画像の縦横判定フックは必ず呼ぶ
   const [isVertical, setIsVertical] = React.useState(false);
   // postはuseMemoで取得されるため、imageUrlは毎回計算
@@ -365,6 +367,12 @@ const ArticlePage = (props) => {
       // ローカル記事がある場合は CMS 側の状態をクリア
       setCmsArticle(null);
     }
+    // 関連記事抽出のため microCMS の一覧を取得（軽量）
+    fetchArticles().then(data => {
+      if (data && Array.isArray(data.contents)) {
+        setCmsArticlesList(data.contents);
+      }
+    }).catch(() => {});
   }, [id]);
 
   // AdSense広告の初期化
@@ -378,16 +386,24 @@ const ArticlePage = (props) => {
   // 目次とid付きHTML生成
   const { toc, html: contentWithIds } = useMemo(() => generateTocAndContent(post?.content), [post]);
   // microCMS記事でも関連記事を表示（ローカル+CMS両方から抽出）
-  const allArticles = [...blogPosts];
-  if (cmsArticle && cmsArticle.id && !allArticles.some(p => p.id === cmsArticle.id)) {
-    allArticles.push(cmsArticle);
+  const allArticles = [
+    ...blogPosts,
+    ...cmsArticlesList
+  ];
+  // 正規化したカテゴリ名を返すユーティリティ
+  function getCategoryName(a) {
+    if (!a) return undefined;
+    if (a.category && typeof a.category === 'object') return a.category.name;
+    return a.category;
   }
-  // slugとidの型違い・不一致を吸収して関連記事を抽出
-  const postSlug = post?.slug ? String(post.slug) : String(post?.id);
+  // 現在の投稿の正規カテゴリ名
+  const currentCatName = getCategoryName(post);
+  // slug/id を文字列化
+  const postSlug = post?.slug ? String(post.slug) : String(post?.id || '');
   const related = allArticles.filter(p => {
-    const pSlug = p.slug ? String(p.slug) : String(p.id);
-    // カテゴリ一致かつ自分以外
-    return p.category === post?.category && pSlug !== postSlug;
+    const pSlug = p.slug ? String(p.slug) : String(p.id || '');
+    // カテゴリ名が同じ、かつ自身以外
+    return getCategoryName(p) === currentCatName && pSlug !== postSlug;
   });
 
   // ローカル記事もなく、まだ CMS からの取得が終わっていない場合は何も表示しない（フラッシュ防止）
@@ -441,16 +457,17 @@ const ArticlePage = (props) => {
             <RelatedList>
               {related.map(r => {
                 const relImg = r.image?.url || r.image;
+                const relLink = `/?p=${r.slug || r.id}`;
                 return (
-                  <RelatedCard to={`/?p=${r.slug}`} key={r.slug}>
+                  <RelatedCard to={relLink} key={r.slug || r.id}>
                     <RelatedImage src={relImg} alt={r.title} />
                     <RelatedCardTitle>{r.title}</RelatedCardTitle>
                   </RelatedCard>
                 );
               })}
-            </RelatedList>
-          </RelatedSection>
-        )}
+             </RelatedList>
+           </RelatedSection>
+         )}
         <BackLink to="/">
           <FaArrowLeft /> トップページへ戻る
         </BackLink>
