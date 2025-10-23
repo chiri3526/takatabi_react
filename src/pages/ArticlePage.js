@@ -292,7 +292,7 @@ const RelatedCard = styled(Link)`
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: 520px; /* 横幅を広げる */
+  width: 640px; /* 横幅を広げる */
   max-width: calc(100% - 40px);
   min-height: 130px; /* 縦に少し広げる */
   background: #f6fff6;
@@ -328,7 +328,7 @@ const RelatedImage = styled.img`
 const RelatedCardTitle = styled.div`
   color: ${theme.colors.primary};
   font-weight: 700;
-  font-size: 1rem; /* 少し大きくして読みやすく */
+  font-size: 0.8rem; /* 少し大きくして読みやすく */
   text-align: left;
   margin: 0;
   line-height: 1.25;
