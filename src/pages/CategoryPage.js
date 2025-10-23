@@ -90,17 +90,6 @@ const categories = [
   { key: 'train', label: '鉄道', cmsName: '鉄道', icon: <FaTrain /> }
 ];
 
-function importAllJson(r) {
-  return r.keys().map(key => {
-    const data = r(key);
-    return {
-      id: data.id || data.slug || key.replace(/^.*[/]/, '').replace(/\.json$/, ''),
-      ...data
-    };
-  });
-}
-// ローカルの JSON 記事はこのページでは使用していないため読み込みを省略しています。
-// 必要な場合は importAllJson を使って読み込んでください。
 
 const CategoryPage = ({ category }) => {
   const [cmsArticles, setCmsArticles] = useState([]);
