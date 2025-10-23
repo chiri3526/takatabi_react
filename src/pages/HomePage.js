@@ -90,8 +90,27 @@ const BlogExcerpt = styled.p`
   line-height: 1.5;
 `;
 
+// 追加: 日付表示用スタイル
+const DateText = styled.div`
+  color: ${theme.colors.text}99;
+  font-size: 0.85rem;
+  margin-bottom: 0.4em;
+`;
+
 // ローカルのJSON記事は現在トップ表示に使用していないため除外しています。
 // 必要ならここにローカル記事を追加してください。
+
+// 日付を日本語表記で整形するユーティリティ
+function formatDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '';
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  } catch (e) {
+    return '';
+  }
+}
 
 const categories = [
   { key: 'domestic', label: '国内旅行', cmsName: '国内旅行', icon: <FaMapMarkerAlt /> },
@@ -150,6 +169,8 @@ const HomePage = () => {
                       }}
                     />
                     <BlogContent>
++                      {/* 追加: 作成日を表示 */}
++                      <DateText>{formatDate(post.publishedAt || post.createdAt || post.updatedAt)}</DateText>
                       <BlogTitle>{post.title}</BlogTitle>
                       <BlogExcerpt>{post.excerpt}</BlogExcerpt>
                     </BlogContent>
