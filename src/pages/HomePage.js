@@ -31,6 +31,30 @@ const BlogGrid = styled.div`
   padding: ${theme.spacing.medium};
 `;
 
+// 4区画レイアウト用のスタイル（欠如していた定義を追加）
+const CategorySection = styled.section`
+  margin-bottom: ${theme.spacing.xlarge};
+`;
+const CategoryHeader = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: ${theme.spacing.medium};
+`;
+const CategoryIcon = styled.div`
+  color: ${theme.colors.primary};
+  font-size: 2.5rem;
+  margin-bottom: 0.5em;
+`;
+const CategoryTitle = styled.h2`
+  font-family: ${theme.font.family};
+  font-weight: ${theme.font.weightBold};
+  color: ${theme.colors.primary};
+  font-size: 1.5rem;
+  margin: 0;
+  text-align: center;
+`;
+
 const BlogCard = styled.article`
   background: ${theme.colors.white};
   border-radius: 8px;
