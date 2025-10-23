@@ -290,34 +290,46 @@ const RelatedList = styled.div`
 `;
 const RelatedCard = styled(Link)`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  width: 180px;
+  width: 420px;
+  max-width: calc(100% - 40px);
   background: #f6fff6;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   text-decoration: none;
   transition: box-shadow 0.2s;
   border: 2px solid ${theme.colors.primary}22;
-  padding: 1em 0.5em 1.2em 0.5em;
+  padding: 0.6em;
+  gap: 0.8em;
   &:hover {
-    box-shadow: 0 4px 16px rgba(0,128,64,0.13);
+    box-shadow: 0 6px 20px rgba(0,128,64,0.13);
     border-color: ${theme.colors.primary};
+  }
+  @media (max-width: 600px) {
+    width: calc(100% - 32px);
+    padding: 0.5em;
   }
 `;
 const RelatedImage = styled.img`
-  width: 100%;
+  width: 38%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
-  border-radius: 18px;
-  margin-bottom: 0.7em;
+  border-radius: 10px;
+  margin: 0;
+  flex-shrink: 0;
 `;
 const RelatedCardTitle = styled.div`
   color: ${theme.colors.primary};
   font-weight: bold;
   font-size: 1.05rem;
-  text-align: center;
-  margin-top: 0.2em;
+  text-align: left;
+  margin: 0;
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 const ArticlePage = (props) => {
