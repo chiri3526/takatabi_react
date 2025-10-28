@@ -165,45 +165,43 @@ const HomePage = () => {
               <CategoryTitle>{cat.label}</CategoryTitle>
             </CategoryHeader>
             <BlogGrid>
-              {postsToShow.map(post => (
-                <Link
-                  to={`/?p=${post.slug || post.id}`}
-                  key={post.id}
-                  style={{ textDecoration: 'none' }}
-                >
-                  <BlogCard>
-                    <BlogImage
-                      src={post.image?.url || post.image}
-                      alt={post.title}
-                      onError={(e) => {
-                        e.target.src = '/sample-images/no-image.jpg';
-                      }}
-                    />
-                    <BlogContent>
-+                      {/* 追加: タグを日付の上に表示（tag フィールドは string / object / array に対応） */}
-+                      {(() => {
-+                        const tagField = post.tag || post.tags || null; // 柔軟に対応
-+                        if (!tagField) return null;
-+                        // tagField が配列なら最初の要素を使う
-+                        if (Array.isArray(tagField) && tagField.length > 0) {
-+                          const t = tagField[0];
-+                          // オブジェクトなら name を使い、文字列ならそのまま表示
-+                          const label = (t && typeof t === 'object') ? (t.name || t.id || '') : String(t);
-+                          return label ? <TagBadge>{label}</TagBadge> : null;
-+                        }
-+                        // 文字列やオブジェクト単体
-+                        if (typeof tagField === 'string') return <TagBadge>{tagField}</TagBadge>;
-+                        if (typeof tagField === 'object') return <TagBadge>{tagField.name || tagField.id || ''}</TagBadge>;
-+                        return null;
-+                      })()}
-+                      {/* 追加: 作成日を表示 */}
-+                      <DateText>{formatDate(post.publishedAt || post.createdAt || post.updatedAt)}</DateText>
-                     <BlogTitle>{post.title}</BlogTitle>
-                     <BlogExcerpt>{post.excerpt}</BlogExcerpt>
-                   </BlogContent>
-                  </BlogCard>
-                </Link>
-              ))}
+              {postsToShow.map(post => {
+                // JSX 内の即時関数ではなくここでタグを安全に計算する
+                const tagField = post.tag || post.tags || null;
+                let tagLabel = null;
+                if (Array.isArray(tagField) && tagField.length > 0) {
+                  const t = tagField[0];
+                  tagLabel = (t && typeof t === 'object') ? (t.name || t.id || '') : String(t);
+                } else if (typeof tagField === 'string') {
+                  tagLabel = tagField;
+                } else if (tagField && typeof tagField === 'object') {
+                  tagLabel = tagField.name || tagField.id || null;
+                }
+
+                return (
+                  <Link
+                    to={`/?p=${post.slug || post.id}`}
+                    key={post.id}
+                    style={{ textDecoration: 'none' }}
+                  >
+                    <BlogCard>
+                      <BlogImage
+                        src={post.image?.url || post.image}
+                        alt={post.title}
+                        onError={(e) => { e.target.src = '/sample-images/no-image.jpg'; }}
+                      />
+                      <BlogContent>
+                        {/* タグ表示（あれば） */}
+                        {tagLabel && <TagBadge>{tagLabel}</TagBadge>}
+                        {/* 作成日 */}
+                        <DateText>{formatDate(post.publishedAt || post.createdAt || post.updatedAt)}</DateText>
+                        <BlogTitle>{post.title}</BlogTitle>
+                        <BlogExcerpt>{post.excerpt}</BlogExcerpt>
+                      </BlogContent>
+                    </BlogCard>
+                  </Link>
+                );
+              })}
             </BlogGrid>
           </CategorySection>
         );
