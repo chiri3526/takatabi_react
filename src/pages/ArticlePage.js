@@ -245,12 +245,20 @@ const ArticleImageEyeCatch = styled.img`
   background: #fff;
   margin-bottom: 1.5em;
 `;
-// 小さく表示する日付コンポーネント（アイキャッチ下に表示）
+// 小さく表示する日付コンポーネント（アイキャッチ上に右寄せでオーバーレイ表示）
 const ArticleDate = styled.div`
   font-size: 0.65rem; /* かなり小さく */
-  color: #6b6b6b;
+  color: #444;
   margin-top: 0.4em;
-  text-align: center;
+  text-align: right;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: rgba(255,255,255,0.85);
+  padding: 0.12rem 0.4rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  z-index: 6;
 `;
 
 const BackLink = styled(Link)`
@@ -454,15 +462,15 @@ const ArticlePage = (props) => {
   {/* EyeCatch削除: 記事ごとの画像のみ表示 */}
       <ArticleContainer>
         <ArticleTitle>{post.title}</ArticleTitle>
-        <div style={{display:'flex', justifyContent:'center'}}>
+        <div style={{display:'flex', justifyContent:'center', position: 'relative'}}>
+          {/* 日付を画像の上、右寄せでオーバーレイ表示 */}
+          {publishedDate && (
+            <ArticleDate>
+              {publishedDate} に公開
+            </ArticleDate>
+          )}
           <ArticleImageEyeCatch src={imageUrl} alt={post.title} className={isVertical ? 'vertical' : ''} />
         </div>
-        {/* 追加: 記事の公開日を表示 */}
-        {publishedDate && (
-          <ArticleDate>
-            {publishedDate} に公開
-          </ArticleDate>
-        )}
         {/* 目次 */}
         {toc.length > 0 && (
           <TocContainer aria-label="目次">
