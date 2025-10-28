@@ -65,6 +65,37 @@ const BlogExcerpt = styled.p`
   line-height: 1.5;
 `;
 
+// 日付表示用スタイル（HomePage と合わせる）
+const DateText = styled.div`
+  color: ${theme.colors.text}99;
+  font-size: 0.85rem;
+  margin-bottom: 0.4em;
+`;
+
+// タグ用バッジ
+const TagBadge = styled.span`
+  display: inline-block;
+  background: ${theme.colors.primary}11;
+  color: ${theme.colors.primary};
+  font-size: 0.75rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  margin-bottom: 0.35em;
+  margin-right: 0.35rem;
+`;
+
+// 日付を日本語表記で整形するユーティリティ
+function formatDate(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '';
+    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  } catch (e) {
+    return '';
+  }
+}
+
 const TopLogo = styled.div`
   width: 100%;
   display: flex;
@@ -116,35 +147,57 @@ const CategoryPage = ({ category }) => {
         <img src={takatabi1} alt="takatabi" style={{width:'50%', height:'70px', borderRadius:'0'}} />
       </TopLogo>
       <BlogGrid>
-        {posts.map(post => (
-          <Link
-            to={`/?p=${post.slug || post.id}`}
-            key={post.id}
-            style={{ textDecoration: 'none' }}
-          >
-            <BlogCard>
-              <BlogImage
-                src={
-                  post.image
-                    ? typeof post.image === 'string'
-                      ? post.image.startsWith('/')
-                        ? post.image
-                        : `/${post.image}`
-                      : post.image.url // microCMS形式
-                    : '/sample-images/no-image.jpg'
-                }
-                alt={post.title}
-                onError={(e) => {
-                  e.target.src = '/sample-images/no-image.jpg';
-                }}
-              />
-              <BlogContent>
-                <BlogTitle>{post.title}</BlogTitle>
-                <BlogExcerpt>{post.excerpt}</BlogExcerpt>
-              </BlogContent>
-            </BlogCard>
-          </Link>
-        ))}
+        {posts.map(post => {
+          // タグを複数扱えるように配列に正規化
+          const tagField = post.tag || post.tags || null;
+          let tagLabels = [];
+          if (Array.isArray(tagField) && tagField.length > 0) {
+            tagLabels = tagField
+              .map(t => (t && typeof t === 'object') ? (t.name || t.id || '') : String(t))
+              .filter(Boolean);
+          } else if (typeof tagField === 'string') {
+            tagLabels = [tagField];
+          } else if (tagField && typeof tagField === 'object') {
+            const label = tagField.name || tagField.id || '';
+            if (label) tagLabels = [label];
+          }
+
+          return (
+            <Link
+              to={`/?p=${post.slug || post.id}`}
+              key={post.id}
+              style={{ textDecoration: 'none' }}
+            >
+              <BlogCard>
+                <BlogImage
+                  src={
+                    post.image
+                      ? typeof post.image === 'string'
+                        ? post.image.startsWith('/')
+                          ? post.image
+                          : `/${post.image}`
+                        : post.image.url // microCMS形式
+                      : '/sample-images/no-image.jpg'
+                  }
+                  alt={post.title}
+                  onError={(e) => {
+                    e.target.src = '/sample-images/no-image.jpg';
+                  }}
+                />
+                <BlogContent>
+                  {/* タグ表示（複数ならすべて表示） */}
+                  {tagLabels.length > 0 && tagLabels.map((lbl, idx) => (
+                    <TagBadge key={`${lbl}-${idx}`}>{lbl}</TagBadge>
+                  ))}
+                  {/* 公開日表示 */}
+                  <DateText>{formatDate(post.publishedAt || post.createdAt || post.updatedAt)}</DateText>
+                  <BlogTitle>{post.title}</BlogTitle>
+                  <BlogExcerpt>{post.excerpt}</BlogExcerpt>
+                </BlogContent>
+              </BlogCard>
+            </Link>
+          );
+        })}
       </BlogGrid>
       <BackLink to="/">
         トップページへ戻る
