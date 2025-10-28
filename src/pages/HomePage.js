@@ -97,6 +97,17 @@ const DateText = styled.div`
   margin-bottom: 0.4em;
 `;
 
+// タグ用バッジ（日付の上に表示）
+const TagBadge = styled.span`
+  display: inline-block;
+  background: ${theme.colors.primary}11;
+  color: ${theme.colors.primary};
+  font-size: 0.75rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  margin-bottom: 0.35em;
+`;
+
 // ローカルのJSON記事は現在トップ表示に使用していないため除外しています。
 // 必要ならここにローカル記事を追加してください。
 
@@ -169,11 +180,27 @@ const HomePage = () => {
                       }}
                     />
                     <BlogContent>
++                      {/* 追加: タグを日付の上に表示（tag フィールドは string / object / array に対応） */}
++                      {(() => {
++                        const tagField = post.tag || post.tags || null; // 柔軟に対応
++                        if (!tagField) return null;
++                        // tagField が配列なら最初の要素を使う
++                        if (Array.isArray(tagField) && tagField.length > 0) {
++                          const t = tagField[0];
++                          // オブジェクトなら name を使い、文字列ならそのまま表示
++                          const label = (t && typeof t === 'object') ? (t.name || t.id || '') : String(t);
++                          return label ? <TagBadge>{label}</TagBadge> : null;
++                        }
++                        // 文字列やオブジェクト単体
++                        if (typeof tagField === 'string') return <TagBadge>{tagField}</TagBadge>;
++                        if (typeof tagField === 'object') return <TagBadge>{tagField.name || tagField.id || ''}</TagBadge>;
++                        return null;
++                      })()}
 +                      {/* 追加: 作成日を表示 */}
 +                      <DateText>{formatDate(post.publishedAt || post.createdAt || post.updatedAt)}</DateText>
-                      <BlogTitle>{post.title}</BlogTitle>
-                      <BlogExcerpt>{post.excerpt}</BlogExcerpt>
-                    </BlogContent>
+                     <BlogTitle>{post.title}</BlogTitle>
+                     <BlogExcerpt>{post.excerpt}</BlogExcerpt>
+                   </BlogContent>
                   </BlogCard>
                 </Link>
               ))}
