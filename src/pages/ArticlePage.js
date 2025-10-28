@@ -245,6 +245,14 @@ const ArticleImageEyeCatch = styled.img`
   background: #fff;
   margin-bottom: 1.5em;
 `;
+// 小さく表示する日付コンポーネント（アイキャッチ下に表示）
+const ArticleDate = styled.div`
+  font-size: 0.65rem; /* かなり小さく */
+  color: #6b6b6b;
+  margin-top: 0.4em;
+  text-align: center;
+`;
+
 const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
@@ -328,7 +336,7 @@ const RelatedImage = styled.img`
 const RelatedCardTitle = styled.div`
   color: ${theme.colors.primary};
   font-weight: 700;
-  font-size: 0.8rem; /* 少し大きくして読みやすく */
+  font-size: 0.8rem;
   text-align: left;
   margin: 0;
   line-height: 1.25;
@@ -341,6 +349,7 @@ const ArticlePage = (props) => {
   const adRef = useRef(null);
   const id = props.id;
   // undefined = 未取得（loading）、object = 取得済、 null = 取得失敗（見つからない）
+
   const [cmsArticle, setCmsArticle] = React.useState(undefined);
   // microCMS の記事リスト（関連記事抽出用）
   const [cmsArticlesList, setCmsArticlesList] = React.useState([]);
@@ -371,6 +380,12 @@ const ArticlePage = (props) => {
       }
     };
   }, [imageUrl]);
+
+  // --- 追加: 記事の公開日 / 作成日 を安全に拾って日本ロケールで整形 ---
+  const publishedRaw = post?.publishedAt || post?.createdAt || post?.date || post?.published;
+  const publishedDate = publishedRaw
+    ? new Date(publishedRaw).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
+    : null;
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -442,6 +457,12 @@ const ArticlePage = (props) => {
         <div style={{display:'flex', justifyContent:'center'}}>
           <ArticleImageEyeCatch src={imageUrl} alt={post.title} className={isVertical ? 'vertical' : ''} />
         </div>
+        {/* 追加: 記事の公開日を表示 */}
+        {publishedDate && (
+          <ArticleDate>
+            {publishedDate} に公開
+          </ArticleDate>
+        )}
         {/* 目次 */}
         {toc.length > 0 && (
           <TocContainer aria-label="目次">
