@@ -166,16 +166,18 @@ const HomePage = () => {
             </CategoryHeader>
             <BlogGrid>
               {postsToShow.map(post => {
-                // JSX 内の即時関数ではなくここでタグを安全に計算する
+                // タグを複数扱えるように配列に正規化
                 const tagField = post.tag || post.tags || null;
-                let tagLabel = null;
+                let tagLabels = [];
                 if (Array.isArray(tagField) && tagField.length > 0) {
-                  const t = tagField[0];
-                  tagLabel = (t && typeof t === 'object') ? (t.name || t.id || '') : String(t);
+                  tagLabels = tagField
+                    .map(t => (t && typeof t === 'object') ? (t.name || t.id || '') : String(t))
+                    .filter(Boolean);
                 } else if (typeof tagField === 'string') {
-                  tagLabel = tagField;
+                  tagLabels = [tagField];
                 } else if (tagField && typeof tagField === 'object') {
-                  tagLabel = tagField.name || tagField.id || null;
+                  const label = tagField.name || tagField.id || '';
+                  if (label) tagLabels = [label];
                 }
 
                 return (
@@ -191,8 +193,10 @@ const HomePage = () => {
                         onError={(e) => { e.target.src = '/sample-images/no-image.jpg'; }}
                       />
                       <BlogContent>
-                        {/* タグ表示（あれば） */}
-                        {tagLabel && <TagBadge>{tagLabel}</TagBadge>}
+                        {/* タグ表示（複数あればすべて表示） */}
+                        {tagLabels.length > 0 && tagLabels.map((lbl, idx) => (
+                          <TagBadge key={`${lbl}-${idx}`}>{lbl}</TagBadge>
+                        ))}
                         {/* 作成日 */}
                         <DateText>{formatDate(post.publishedAt || post.createdAt || post.updatedAt)}</DateText>
                         <BlogTitle>{post.title}</BlogTitle>
