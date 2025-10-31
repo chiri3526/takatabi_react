@@ -104,7 +104,6 @@ function generateTocAndContent(html) {
                 }
               } catch (e) { }
 
-              const favicon = `https://www.google.com/s2/favicons?domain=${domain}`;
 
             // ext-inner を作って内部を構築
             const wrapper = doc.createElement('div');
@@ -2334,7 +2333,6 @@ const ArticlePage = (props) => {
             const isSameOrigin = url.origin === window.location.origin;
             if (isHttp && !isSameOrigin) {
               const domain = url.hostname.replace(/^www\./, '');
-              const favicon = `https://www.google.com/s2/favicons?domain=${domain}`;
 
               const wrapper = document.createElement('div');
               wrapper.className = 'ext-inner';
@@ -2400,8 +2398,7 @@ const ArticlePage = (props) => {
           // skip if already inside an anchor
           if (inner.closest('a.external-link')) return;
           // find nearest anchor siblings that share the same href
-          const hrefCandidates = new Set();
-          const aSiblings = Array.from(containerEl.querySelectorAll('a.external-link'));
+  // hrefCandidates / aSiblings removed (unused)
           // collect anchors that have same href and are adjacent to this inner
           let anchor = null;
           // look back
