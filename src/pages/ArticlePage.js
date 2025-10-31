@@ -97,7 +97,7 @@ function generateTocAndContent(html) {
             const domain = url.hostname.replace(/^www\./, '');
             // 既に同じ href の external-link が container 内にあれば重複作成をスキップ
               try {
-                const existing = container.querySelector(`a.external-link[href=\"${href}\"]`);
+                const existing = doc.querySelector(`a.external-link[href="${href}"]`);
                 if (existing) {
                   if (a.dataset) a.dataset.previewApplied = '1';
                   return;
