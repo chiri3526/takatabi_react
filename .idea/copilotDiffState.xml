@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/scripts/fix_container_in_generate.js">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/scripts/fix_container_in_generate.js" />
+              <option name="updatedContent" value="const fs = require('fs');&#10;const path = require('path');&#10;const file = path.join(__dirname, '..', 'src', 'pages', 'ArticlePage.js');&#10;let s = fs.readFileSync(file, 'utf8');&#10;// Replace the specific container.querySelector(...) inside the DOMParser section with doc.querySelector(...)&#10;s = s.replace(/const existing = container\.querySelector\(`a\.external-link\[href=\\&quot;\$\{href\}\\&quot;\]`\);/g, 'const existing = doc.querySelector(`a.external-link[href=&quot;${href}&quot;]`);');&#10;fs.writeFileSync(file, s, 'utf8');&#10;console.log('Replaced container.querySelector with doc.querySelector in generateTocAndContent');&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
