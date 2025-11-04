@@ -427,8 +427,7 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    /* allow images to expand to the available content width */
-    max-width: none !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
@@ -436,18 +435,6 @@ const ArticleContent = styled.div`
     display: block;
     background: transparent;
     padding: 0;
-  }
-
-  /* デスクトップでは画像を画面幅いっぱいにブリード表示して可能な限り大きくする */
-  @media (min-width: 900px) {
-    img.cms-image, .cms-image {
-      width: 100vw !important; /* ビューポート幅いっぱい */
-      max-width: none !important;
-      margin-left: calc(50% - 50vw); /* 親コンテナ内で中央にブリード */
-      margin-right: calc(50% - 50vw);
-      border-radius: 0; /* ブリードでは角丸を外すと端で切れが自然 */
-      padding: 0;
-    }
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -461,21 +448,11 @@ const ArticleContent = styled.div`
 
   /* タブレットで少し控えめに */
   @media (max-width: 900px) {
-    /* モバイル/タブレットでも可能な限り画面いっぱいに表示する */
-    img.cms-image,
+    img,
     .cms-image {
-      width: 100vw !important; /* ビューポート幅いっぱい */
-      max-width: none !important;
-      margin-left: calc(50% - 50vw);
-      margin-right: calc(50% - 50vw);
-      box-sizing: border-box;
-      margin-top: 1.4em;
-      margin-bottom: 1.4em;
-      padding: 0;
-      border-radius: 0; /* ブリードでは角丸を外す */
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
     }
-    /* ただしファビコンなど小さな画像は除外（.ext-favicon がある場合） */
-    img.ext-favicon { width: auto !important; max-width: 48px !important; margin-left: 0 !important; margin-right: 0 !important; border-radius: 6px; }
   }
 
   /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
@@ -483,23 +460,13 @@ const ArticleContent = styled.div`
     font-size: 1.02rem; /* モバイルでも少し小さめに */
     img.cms-image,
     img:not(.ext-favicon) {
-      /* 安全に幅を100%にしてはみ出しを防止 */
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: 1.2em 0;
-      transform: none;
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
       border-radius: 12px;
       display: block;
-      box-sizing: border-box;
-      padding: 0;
     }
-  }
-
-  /* 見出しが長い単語やURLで幅を超えないように折返しを強制 */
-  h2, h3, h4 {
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: anywhere;
   }
 
   /* 追加: 外部リンクカードに矢印アイコンを表示 */
@@ -532,27 +499,1551 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* ここから表示幅を広げる調整 */
-  /* 元は width: 60%; max-width: 500px; min-width: 220px; */
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-  margin-left: 0;
-  margin-right: 0;
-  box-sizing: border-box;
-
-  @media (max-width: 1000px) {
-    width: 92%;
-    max-width: 920px;
-    font-size: 0.98rem;
-    padding: 0.8em 0.8em;
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
   }
-  @media (max-width: 600px) {
-    /* コンテナ内での100%幅にして親のパディングに合わせる（vw を使うと親の余白と衝突してはみ出す） */
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
     width: 100%;
-    box-sizing: border-box;
-    font-size: 0.92rem;
-    padding: 0.7em 0.7em;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控��めに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  /* 既存スタイル続行 */
+  h2 {
+    color: ${theme.colors.primary};
+    font-size: 1.3rem;
+    border-left: 7px solid ${theme.colors.primary};
+    border-radius: 0 12px 12px 0;
+    padding-left: 0.7em;
+    margin: 2em 0 1em 0;
+    font-weight: bold;
+    background: #f6fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h3 {
+    color: ${theme.colors.secondary};
+    font-size: 1.1rem;
+    margin: 1.5em 0 0.7em 0;
+    font-weight: bold;
+    border-left: 5px solid ${theme.colors.secondary};
+    border-radius: 0 10px 10px 0;
+    padding-left: 0.6em;
+    background: #eaffea;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  h4 {
+    color: ${theme.colors.accent};
+    font-size: 1.05rem;
+    margin: 1.2em 0 0.5em 0;
+    font-weight: bold;
+    border-left: 4px dashed ${theme.colors.accent};
+    border-radius: 0 8px 8px 0;
+    padding-left: 0.5em;
+    background: #f9fff6;
+    font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
+  }
+  strong, .em {
+    color: ${theme.colors.highlight};
+    background: #fffbe6;
+    font-weight: bold;
+    padding: 0 0.2em;
+    border-radius: 4px;
+  }
+
+  /* 本文内画像をコンテナ内に収める */
+  img.cms-image,
+  .cms-image {
+    border-radius: 16px;
+    width: 100% !important;
+    max-width: 920px !important;
+    height: auto !important;
+    object-fit: contain;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    margin: 1.6em auto;
+    display: block;
+    background: transparent;
+    padding: 0;
+  }
+
+  /* 横長カードを確実にするための微調整 */
+  .external-link_obsolete {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    position: relative; /* 矢印を絶対配置で右端中央にするため */
+  }
+
+  /* タブレットで少し控えめに */
+  @media (max-width: 900px) {
+    img,
+    .cms-image {
+      width: calc(100% + 80px) !important;
+      margin: 1.4em -16px;
+    }
+  }
+
+  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  @media (max-width: 600px) {
+    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    img.cms-image,
+    img:not(.ext-favicon) {
+      width: calc(100% + 76px) !important;
+      max-width: none !important;
+      margin: 1.2em 50%;
+      transform: translateX(-50%);
+      border-radius: 12px;
+      display: block;
+    }
+  }
+
+  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  .external-link_obsolete .ext-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: ${theme.colors.primary};
+    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+  }
+  .external-link_obsolete .ext-arrow svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    stroke: currentColor;
+    vector-effect: non-scaling-stroke;
+  }
+  /* モバイル用: 矢印アイコンを小さく */
+  @media (max-width: 600px) {
+    .external-link_obsolete .ext-arrow {
+      right: 10px;
+      width: 14px;
+      height: 14px;
+    }
   }
 `;
 
