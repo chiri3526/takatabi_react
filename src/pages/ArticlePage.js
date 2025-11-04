@@ -5,8 +5,7 @@ import { theme } from '../styles/theme';
 import { FaLink, FaArrowLeft } from 'react-icons/fa';
 import { fetchArticleById, fetchArticles } from '../api/microcms';
 
-// JSONファイルを一括取得（記事一覧を作るため）
-function importAllJson(r) {
+// JSON繝輔ぃ繧､繝ｫ繧剃ｸ諡ｬ蜿門ｾ暦ｼ郁ｨ倅ｺ倶ｸ隕ｧ繧剃ｽ懊ｋ縺溘ａ・・function importAllJson(r) {
   return r.keys().map(key => {
     const data = r(key);
     return {
@@ -18,16 +17,15 @@ function importAllJson(r) {
 
 const jsonArticles = importAllJson(require.context('../articles', false, /\.json$/));
 
-// blogPosts: HomePage/CategoryPageと同じローカル記事配列を定義
+// blogPosts: HomePage/CategoryPage縺ｨ蜷後§繝ｭ繝ｼ繧ｫ繝ｫ險倅ｺ矩・蛻励ｒ螳夂ｾｩ
 const blogPosts = [
   ...jsonArticles
-  // 必要ならここにjs記事やテスト記事を追加可能
+  // 蠢・ｦ√↑繧峨％縺薙↓js險倅ｺ九ｄ繝・せ繝郁ｨ倅ｺ九ｒ霑ｽ蜉蜿ｯ閭ｽ
 ];
 
 
-// Google AdSense script を head に挿入するユーティリティ（重複挿入を防止）
-function useAdsenseScript() {
-  // 実行環境でのみ DOM にスクリプトを挿入
+// Google AdSense script 繧・head 縺ｫ謖ｿ蜈･縺吶ｋ繝ｦ繝ｼ繝・ぅ繝ｪ繝・ぅ・磯㍾隍・諺蜈･繧帝亟豁｢・・function useAdsenseScript() {
+  // 螳溯｡檎腸蠅・〒縺ｮ縺ｿ DOM 縺ｫ繧ｹ繧ｯ繝ｪ繝励ヨ繧呈諺蜈･
   try {
     if (typeof document === 'undefined') return;
     if (!document.querySelector('script[src*="adsbygoogle.js?client=ca-pub-7728107798566122"]')) {
@@ -38,33 +36,32 @@ function useAdsenseScript() {
       document.head.appendChild(script);
     }
   } catch (e) {
-    // サーバーサイド環境やテスト環境では無視
-  }
+    // 繧ｵ繝ｼ繝舌・繧ｵ繧､繝臥腸蠅・ｄ繝・せ繝育腸蠅・〒縺ｯ辟｡隕・  }
 }
 
-// 目次生成関数
+// 逶ｮ谺｡逕滓・髢｢謨ｰ
 function generateTocAndContent(html) {
   if (!html) return { toc: [], html };
   let idx = 0;
   const toc = [];
-  // h2/h3タグにidを付与しつつtoc配列を作る
+  // h2/h3繧ｿ繧ｰ縺ｫid繧剃ｻ倅ｸ弱＠縺､縺､toc驟榊・繧剃ｽ懊ｋ
   let newHtml = html.replace(/<(h[23])([^>]*)>(.*?)<\/\1>/g, (match, tag, attrs, text) => {
     const cleanText = text.replace(/<[^>]+>/g, '');
     const id = `heading-${tag}-${idx++}`;
     toc.push({ tag, text: cleanText, id });
     return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
   });
-  // imgタグのsrcが/contents/で始まる場合、絶対パスに補正
+  // img繧ｿ繧ｰ縺ｮsrc縺・contents/縺ｧ蟋九∪繧句ｴ蜷医∫ｵｶ蟇ｾ繝代せ縺ｫ陬懈ｭ｣
   newHtml = newHtml.replace(/<img([^>]*?)src=["'](\/contents\/[^"'>]+)["']([^>]*)>/g, (match, before, src, after) => {
     return `<img${before}src="${src}"${after}>`;
   });
 
-  // --- 追加: img の inline 属性(width/height/style) を削除し class="cms-image" を付与 ---
+  // --- 霑ｽ蜉: img 縺ｮ inline 螻樊ｧ(width/height/style) 繧貞炎髯､縺・class="cms-image" 繧剃ｻ倅ｸ・---
   newHtml = newHtml.replace(/<img([^>]*)>/g, (match, attrs) => {
-    // attrs 部から width, height, style を削除
+    // attrs 驛ｨ縺九ｉ width, height, style 繧貞炎髯､
     let cleaned = attrs.replace(/\s*(width|height)=["'][^"']*["']/gi, '');
     cleaned = cleaned.replace(/\s*style=["'][^"']*["']/gi, '');
-    // class があれば追記、なければ追加
+    // class 縺後≠繧後・霑ｽ險倥√↑縺代ｌ縺ｰ霑ｽ蜉
     if (/class=/.test(cleaned)) {
       cleaned = cleaned.replace(/class=("|')(.*?)("|')/i, (m, q, cls) => `class=${q}${cls} cms-image${q}`);
     } else {
@@ -73,14 +70,14 @@ function generateTocAndContent(html) {
     return `<img${cleaned}>`;
   });
 
-  // --- 追加: Google Maps のリンクを短いラベルに置換して target/rel を付与 ---
+  // --- 霑ｽ蜉: Google Maps 縺ｮ繝ｪ繝ｳ繧ｯ繧堤洒縺・Λ繝吶Ν縺ｫ鄂ｮ謠帙＠縺ｦ target/rel 繧剃ｻ倅ｸ・---
   newHtml = newHtml.replace(/<a([^>]*href=["'][^"']*google\.com\/maps[^"']*["'][^>]*)>(.*?)<\/a>/gi, (match, attrs, inner) => {
     let cleaned = attrs.replace(/\s*target=["'][^"']*["']/gi, '');
     cleaned = cleaned.replace(/\s*rel=["'][^"']*["']/gi, '');
-    return `<a${cleaned} target="_blank" rel="noopener noreferrer">📍 Googleマップ</a>`;
+    return `<a${cleaned} target="_blank" rel="noopener noreferrer">桃 Google繝槭ャ繝・/a>`;
   });
 
-  // --- 追加: ブラウザ環境では DOMParser を使って外部リンクをカードに変換 ---
+  // --- 霑ｽ蜉: 繝悶Λ繧ｦ繧ｶ迺ｰ蠅・〒縺ｯ DOMParser 繧剃ｽｿ縺｣縺ｦ螟夜Κ繝ｪ繝ｳ繧ｯ繧偵き繝ｼ繝峨↓螟画鋤 ---
   try {
     if (typeof window !== 'undefined' && typeof window.DOMParser !== 'undefined') {
       const parser = new DOMParser();
@@ -95,7 +92,7 @@ function generateTocAndContent(html) {
           const isSameOrigin = url.origin === window.location.origin;
           if (isHttp && !isSameOrigin) {
             const domain = url.hostname.replace(/^www\./, '');
-            // 既に同じ href の external-link が container 内にあれば重複作成をスキップ
+            // 譌｢縺ｫ蜷後§ href 縺ｮ external-link 縺・container 蜀・↓縺ゅｌ縺ｰ驥崎､・ｽ懈・繧偵せ繧ｭ繝・・
               try {
                 const existing = doc.querySelector(`a.external-link[href="${href}"]`);
                 if (existing) {
@@ -105,11 +102,10 @@ function generateTocAndContent(html) {
               } catch (e) { }
 
 
-            // ext-inner を作って内部を構築
-            const wrapper = doc.createElement('div');
+            // ext-inner 繧剃ｽ懊▲縺ｦ蜀・Κ繧呈ｧ狗ｯ・            const wrapper = doc.createElement('div');
             wrapper.className = 'ext-inner';
 
-            // ファビコンは表示しない（省略）: meta のみ作成
+            // 繝輔ぃ繝薙さ繝ｳ縺ｯ陦ｨ遉ｺ縺励↑縺・ｼ育怐逡･・・ meta 縺ｮ縺ｿ菴懈・
             const meta = doc.createElement('div');
             meta.className = 'ext-meta';
 
@@ -124,10 +120,9 @@ function generateTocAndContent(html) {
             meta.appendChild(titleDiv);
             meta.appendChild(domainDiv);
 
-            // wrapper の順序: メタのみ（ファビコンなし）
-            wrapper.appendChild(meta);
+            // wrapper 縺ｮ鬆・ｺ・ 繝｡繧ｿ縺ｮ縺ｿ・医ヵ繧｡繝薙さ繝ｳ縺ｪ縺暦ｼ・            wrapper.appendChild(meta);
 
-            // 追加: 外部感を示す小さな矢印アイコンを追加
+            // 霑ｽ蜉: 螟夜Κ諢溘ｒ遉ｺ縺吝ｰ上＆縺ｪ遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定ｿｽ蜉
             const arrow = doc.createElement('span');
             arrow.className = 'ext-arrow';
             arrow.innerHTML = `
@@ -137,21 +132,19 @@ function generateTocAndContent(html) {
               </svg>`;
             wrapper.appendChild(arrow);
 
-            // アンカー自体を外部リンク表示に調整
+            // 繧｢繝ｳ繧ｫ繝ｼ閾ｪ菴薙ｒ螟夜Κ繝ｪ繝ｳ繧ｯ陦ｨ遉ｺ縺ｫ隱ｿ謨ｴ
             a.innerHTML = '';
             a.appendChild(wrapper);
             // preserve existing classes and add external-link
             a.className = (a.className ? a.className + ' external-link' : 'external-link');
             a.setAttribute('target', '_blank');
             a.setAttribute('rel', 'noopener noreferrer');
-            // 変換済みフラグを付与（クライアント側処理の重複を避けるため）
-            a.setAttribute('data-preview-applied', '1');
+            // 螟画鋤貂医∩繝輔Λ繧ｰ繧剃ｻ倅ｸ趣ｼ医け繝ｩ繧､繧｢繝ｳ繝亥・蜃ｦ逅・・驥崎､・ｒ驕ｿ縺代ｋ縺溘ａ・・            a.setAttribute('data-preview-applied', '1');
           }
         } catch (e) {
-          // 個別アンカーの変換エラーは無視
-        }
+          // 蛟句挨繧｢繝ｳ繧ｫ繝ｼ縺ｮ螟画鋤繧ｨ繝ｩ繝ｼ縺ｯ辟｡隕・        }
       });
-      // --- 追加: サーバ側で同一 href の external-link を重複削除 ---
+      // --- 霑ｽ蜉: 繧ｵ繝ｼ繝仙・縺ｧ蜷御ｸ href 縺ｮ external-link 繧帝㍾隍・炎髯､ ---
       try {
         const seen = new Set();
         const anchorsAll = Array.from(doc.querySelectorAll('a.external-link'));
@@ -168,12 +161,10 @@ function generateTocAndContent(html) {
         });
       } catch (e) {}
 
-      // シリアライズして戻す
-      newHtml = doc.body.innerHTML;// シリアライズして戻す
-      newHtml = doc.body.innerHTML;
+      // 繧ｷ繝ｪ繧｢繝ｩ繧､繧ｺ縺励※謌ｻ縺・      newHtml = doc.body.innerHTML;// 繧ｷ繝ｪ繧｢繝ｩ繧､繧ｺ縺励※謌ｻ縺・      newHtml = doc.body.innerHTML;
     }
   } catch (e) {
-    // DOMParser 系のエラーは無視して元の newHtml を返す
+    // DOMParser 邉ｻ縺ｮ繧ｨ繝ｩ繝ｼ縺ｯ辟｡隕悶＠縺ｦ蜈・・ newHtml 繧定ｿ斐☆
   }
 
   return { toc, html: newHtml };
@@ -195,8 +186,7 @@ const TocLink = styled.a`
 `;
 
 
-// 目次(Toc)コンポーネント
-const TocContainer = styled.nav`
+// 逶ｮ谺｡(Toc)繧ｳ繝ｳ繝昴・繝阪Φ繝・const TocContainer = styled.nav`
   background: #f6fff6;
   border: 2px solid #2E7D32;
   border-radius: 12px;
@@ -284,11 +274,11 @@ const ArticleContent = styled.div`
 
 
   color: ${theme.colors.text};
-  font-size: 1.0rem; /* 基本フォントを小さめに調整 */
+  font-size: 1.0rem; /* 蝓ｺ譛ｬ繝輔か繝ｳ繝医ｒ蟆上＆繧√↓隱ｿ謨ｴ */
   line-height: 1.7;
   font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
 
-  /* 本文内リンクの折り返しと最大幅制御 */
+  /* 譛ｬ譁・・繝ｪ繝ｳ繧ｯ縺ｮ謚倥ｊ霑斐＠縺ｨ譛螟ｧ蟷・宛蠕｡ */
   a {
     overflow-wrap: anywhere;
     word-break: break-word;
@@ -296,7 +286,7 @@ const ArticleContent = styled.div`
     max-width: 100%;
   }
 
-  /* リンクプレビュー用スタイル */
+  /* 繝ｪ繝ｳ繧ｯ繝励Ξ繝薙Η繝ｼ逕ｨ繧ｹ繧ｿ繧､繝ｫ */
   .link-preview {
     display: flex;
     gap: 0.8em;
@@ -324,9 +314,9 @@ const ArticleContent = styled.div`
     line-height: 1.2;
   }
 
-  /* 追加: 外部リンク用のカード表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ逕ｨ縺ｮ繧ｫ繝ｼ繝芽｡ｨ遉ｺ */
   .external-link_obsolete {
-    display: block; /* anchor をブロックにして横幅いっぱいのカードにする */
+    display: block; /* anchor 繧偵ヶ繝ｭ繝・け縺ｫ縺励※讓ｪ蟷・＞縺｣縺ｱ縺・・繧ｫ繝ｼ繝峨↓縺吶ｋ */
     border: 1px solid #e9f5ef;
     background: linear-gradient(180deg,#ffffff,#f8fff8);
     padding: 0.45rem 0.6rem;
@@ -336,31 +326,31 @@ const ArticleContent = styled.div`
     color: inherit;
     transition: transform 0.12s ease, box-shadow 0.12s ease;
     width: 100%;
-    box-sizing: border-box; /* はみ出し防止 */
+    box-sizing: border-box; /* 縺ｯ縺ｿ蜃ｺ縺鈴亟豁｢ */
     overflow: hidden;
   }
   .external-link_obsolete:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,128,64,0.08); }
 
-  /* 内部コンテナを横並びにする（左: favicon、右: meta） */
+  /* 蜀・Κ繧ｳ繝ｳ繝・リ繧呈ｨｪ荳ｦ縺ｳ縺ｫ縺吶ｋ・亥ｷｦ: favicon縲∝承: meta・・*/
   .external-link_obsolete .ext-inner{
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    padding-right: 28px; /* 右端の矢印分の余白を確保（ファビコン無しで少し小さめ） */
+    padding-right: 28px; /* 蜿ｳ遶ｯ縺ｮ遏｢蜊ｰ蛻・・菴咏區繧堤｢ｺ菫晢ｼ医ヵ繧｡繝薙さ繝ｳ辟｡縺励〒蟆代＠蟆上＆繧・ｼ・*/
   }
   .external-link_obsolete .ext-meta { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
   .external-link_obsolete .ext-title { font-weight: 700; color: ${theme.colors.primary}; font-size: 0.95rem; white-space: normal; overflow: visible; word-break: break-word; }
   .external-link_obsolete .ext-domain { font-size: 0.75rem; color: ${theme.colors.text}99; margin-top: 0.18rem; white-space: normal; color: ${theme.colors.text}88; }
 
-  /* モバイル（小さい画面）での折返し対応 */
+  /* 繝｢繝舌う繝ｫ・亥ｰ上＆縺・判髱｢・峨〒縺ｮ謚倩ｿ斐＠蟇ｾ蠢・*/
   @media (max-width: 600px) {
     .external-link_obsolete {
       padding: 0.36rem 0.5rem;
       gap: 0.6rem;
       align-items: flex-start;
-      /* ext-inner が折り返す */
+      /* ext-inner 縺梧釜繧願ｿ斐☆ */
     }
     .external-link_obsolete .ext-favicon {
       width: 28px !important;
@@ -368,19 +358,19 @@ const ArticleContent = styled.div`
     }
     .external-link_obsolete .ext-meta { min-width: 0; }
     .external-link_obsolete .ext-title {
-      white-space: normal; /* 折り返す */
+      white-space: normal; /* 謚倥ｊ霑斐☆ */
       font-size: 0.92rem;
       line-height: 1.2;
       overflow: visible;
     }
     .external-link_obsolete .ext-domain {
       white-space: normal;
-      word-break: break-all; /* ドメインが長い場合に折り返す */
+      word-break: break-all; /* 繝峨Γ繧､繝ｳ縺碁聞縺・ｴ蜷医↓謚倥ｊ霑斐☆ */
       color: ${theme.colors.text}88;
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -422,7 +412,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -437,16 +427,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -455,9 +445,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -469,7 +459,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -481,7 +471,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -490,7 +480,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -499,7 +489,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -541,7 +531,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -556,16 +546,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -574,9 +564,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -588,7 +578,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -600,7 +590,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -609,7 +599,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -618,7 +608,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -660,7 +650,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -675,16 +665,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -693,9 +683,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -707,7 +697,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -719,7 +709,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -728,7 +718,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -737,7 +727,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -779,7 +769,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -794,16 +784,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -812,9 +802,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -826,7 +816,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -838,7 +828,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -847,7 +837,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -856,7 +846,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -898,7 +888,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -913,16 +903,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控��めに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ・ｽ・ｽ繧√↓ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -931,9 +921,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -945,7 +935,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -957,7 +947,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -966,7 +956,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -975,7 +965,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1017,7 +1007,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1032,16 +1022,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -1050,9 +1040,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -1064,7 +1054,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -1076,7 +1066,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -1085,7 +1075,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -1094,7 +1084,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1136,7 +1126,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1151,16 +1141,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -1169,9 +1159,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -1183,7 +1173,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -1195,7 +1185,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -1204,7 +1194,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -1213,7 +1203,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1255,7 +1245,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1270,16 +1260,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -1288,9 +1278,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -1302,7 +1292,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -1314,7 +1304,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -1323,7 +1313,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -1332,7 +1322,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1374,7 +1364,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1389,16 +1379,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -1407,9 +1397,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -1421,7 +1411,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -1433,7 +1423,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -1442,7 +1432,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -1451,7 +1441,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1493,7 +1483,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1508,16 +1498,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -1526,9 +1516,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -1540,7 +1530,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -1552,7 +1542,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -1561,7 +1551,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -1570,7 +1560,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1612,7 +1602,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1627,16 +1617,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -1645,9 +1635,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -1659,7 +1649,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -1671,7 +1661,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -1680,7 +1670,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -1689,7 +1679,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1731,7 +1721,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1746,16 +1736,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -1764,9 +1754,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -1778,7 +1768,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -1790,7 +1780,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -1799,7 +1789,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -1808,7 +1798,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1850,7 +1840,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1865,16 +1855,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -1883,9 +1873,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -1897,7 +1887,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -1909,7 +1899,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -1918,7 +1908,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -1927,7 +1917,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 既存スタイル続行 */
+  /* 譌｢蟄倥せ繧ｿ繧､繝ｫ邯夊｡・*/
   h2 {
     color: ${theme.colors.primary};
     font-size: 1.3rem;
@@ -1969,7 +1959,7 @@ const ArticleContent = styled.div`
     border-radius: 4px;
   }
 
-  /* 本文内画像をコンテナ内に収める */
+  /* 譛ｬ譁・・逕ｻ蜒上ｒ繧ｳ繝ｳ繝・リ蜀・↓蜿弱ａ繧・*/
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1984,16 +1974,16 @@ const ArticleContent = styled.div`
     padding: 0;
   }
 
-  /* 横長カードを確実にするための微調整 */
+  /* 讓ｪ髟ｷ繧ｫ繝ｼ繝峨ｒ遒ｺ螳溘↓縺吶ｋ縺溘ａ縺ｮ蠕ｮ隱ｿ謨ｴ */
   .external-link_obsolete {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     width: 100%;
-    position: relative; /* 矢印を絶対配置で右端中央にするため */
+    position: relative; /* 遏｢蜊ｰ繧堤ｵｶ蟇ｾ驟咲ｽｮ縺ｧ蜿ｳ遶ｯ荳ｭ螟ｮ縺ｫ縺吶ｋ縺溘ａ */
   }
 
-  /* タブレットで少し控えめに */
+  /* 繧ｿ繝悶Ξ繝・ヨ縺ｧ蟆代＠謗ｧ縺医ａ縺ｫ */
   @media (max-width: 900px) {
     img,
     .cms-image {
@@ -2002,9 +1992,9 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* モバイルでは画像を少しはみ出させて目立たせつつ中央寄せ */
+  /* 繝｢繝舌う繝ｫ縺ｧ縺ｯ逕ｻ蜒上ｒ蟆代＠縺ｯ縺ｿ蜃ｺ縺輔○縺ｦ逶ｮ遶九◆縺帙▽縺､荳ｭ螟ｮ蟇・○ */
   @media (max-width: 600px) {
-    font-size: 1.02rem; /* モバイルでも少し小さめに */
+    font-size: 1.02rem; /* 繝｢繝舌う繝ｫ縺ｧ繧ょｰ代＠蟆上＆繧√↓ */
     img.cms-image,
     img:not(.ext-favicon) {
       width: calc(100% + 76px) !important;
@@ -2016,7 +2006,7 @@ const ArticleContent = styled.div`
     }
   }
 
-  /* 追加: 外部リンクカードに矢印アイコンを表示 */
+  /* 霑ｽ蜉: 螟夜Κ繝ｪ繝ｳ繧ｯ繧ｫ繝ｼ繝峨↓遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定｡ｨ遉ｺ */
   .external-link_obsolete .ext-arrow {
     position: absolute;
     right: 12px;
@@ -2028,7 +2018,7 @@ const ArticleContent = styled.div`
     align-items: center;
     justify-content: center;
     color: ${theme.colors.primary};
-    pointer-events: none; /* アイコン自体はクリック対象にしない（アンカー全体がリンク） */
+    pointer-events: none; /* 繧｢繧､繧ｳ繝ｳ閾ｪ菴薙・繧ｯ繝ｪ繝・け蟇ｾ雎｡縺ｫ縺励↑縺・ｼ医い繝ｳ繧ｫ繝ｼ蜈ｨ菴薙′繝ｪ繝ｳ繧ｯ・・*/
   }
   .external-link_obsolete .ext-arrow svg {
     width: 100%;
@@ -2037,7 +2027,7 @@ const ArticleContent = styled.div`
     stroke: currentColor;
     vector-effect: non-scaling-stroke;
   }
-  /* モバイル用: 矢印アイコンを小さく */
+  /* 繝｢繝舌う繝ｫ逕ｨ: 遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧貞ｰ上＆縺・*/
   @media (max-width: 600px) {
     .external-link_obsolete .ext-arrow {
       right: 10px;
@@ -2063,7 +2053,7 @@ const ArticleContainer = styled.div`
   }
 `;
 const ArticleTitle = styled.h1`
-  font-size: 1.2rem; // 小さめに変更
+  font-size: 1.2rem; // 蟆上＆繧√↓螟画峩
   color: ${theme.colors.primary};
   margin-bottom: ${theme.spacing.medium};
 `;
@@ -2076,13 +2066,12 @@ const ArticleImageEyeCatch = styled.img`
   background: transparent;
   margin-bottom: 1.5em;
 `;
-// 小さく表示する日付コンポーネント（アイキャッチ上に右寄せでオーバーレイ表示）
-const ArticleDate = styled.div`
-  font-size: 0.65rem; /* かなり小さく */
+// 蟆上＆縺剰｡ｨ遉ｺ縺吶ｋ譌･莉倥さ繝ｳ繝昴・繝阪Φ繝茨ｼ医い繧､繧ｭ繝｣繝・メ荳翫↓蜿ｳ蟇・○縺ｧ繧ｪ繝ｼ繝舌・繝ｬ繧､陦ｨ遉ｺ・・const ArticleDate = styled.div`
+  font-size: 0.65rem; /* 縺九↑繧雁ｰ上＆縺・*/
   color: #444;
   text-align: right;
   position: absolute;
-  top: 8px; /* アイキャッチ右上に配置 */
+  top: 8px; /* 繧｢繧､繧ｭ繝｣繝・メ蜿ｳ荳翫↓驟咲ｽｮ */
   right: 10px;
   background: rgba(255,255,255,0.85);
   padding: 0.12rem 0.4rem;
@@ -2091,9 +2080,8 @@ const ArticleDate = styled.div`
   z-index: 6;
 `;
 
-// 追加: アイキャッチ上に表示するタグのコンテナとバッジ
-// （記事ページではタグ表示不要のため削除）
-
+// 霑ｽ蜉: 繧｢繧､繧ｭ繝｣繝・メ荳翫↓陦ｨ遉ｺ縺吶ｋ繧ｿ繧ｰ縺ｮ繧ｳ繝ｳ繝・リ縺ｨ繝舌ャ繧ｸ
+// ・郁ｨ倅ｺ九・繝ｼ繧ｸ縺ｧ縺ｯ繧ｿ繧ｰ陦ｨ遉ｺ荳崎ｦ√・縺溘ａ蜑企勁・・
 const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
@@ -2116,8 +2104,7 @@ const BackLink = styled(Link)`
   }
 `;
 
-// 関連記事リスト
-const RelatedSection = styled.div`
+// 髢｢騾｣險倅ｺ九Μ繧ｹ繝・const RelatedSection = styled.div`
   margin-top: 48px;
   text-align: center;
 `;
@@ -2141,9 +2128,9 @@ const RelatedCard = styled(Link)`
   display: flex;
   flex-direction: row;
   align-items: center;
-  width: 640px; /* 横幅を広げる */
+  width: 640px; /* 讓ｪ蟷・ｒ蠎・￡繧・*/
   max-width: calc(100% - 40px);
-  min-height: 130px; /* 縦に少し広げる */
+  min-height: 130px; /* 邵ｦ縺ｫ蟆代＠蠎・￡繧・*/
   background: #f6fff6;
   border-radius: 12px;
   box-shadow: 0 3px 12px rgba(0,0,0,0.08);
@@ -2167,7 +2154,7 @@ const RelatedCard = styled(Link)`
   }
 `;
 const RelatedImage = styled.img`
-  width: 44%; /* 画像幅を大きくして目立たせる */
+  width: 44%; /* 逕ｻ蜒丞ｹ・ｒ螟ｧ縺阪￥縺励※逶ｮ遶九◆縺帙ｋ */
   aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: 12px;
@@ -2181,37 +2168,32 @@ const RelatedCardTitle = styled.div`
   text-align: left;
   margin: 0;
   line-height: 1.25;
-  word-break: break-word; /* 長い単語を折り返す */
-  white-space: normal; /* 折り返し許可 */
+  word-break: break-word; /* 髟ｷ縺・腰隱槭ｒ謚倥ｊ霑斐☆ */
+  white-space: normal; /* 謚倥ｊ霑斐＠險ｱ蜿ｯ */
 `;
 
 const ArticlePage = (props) => {
   useAdsenseScript();
   const adRef = useRef(null);
   const id = props.id;
-  // undefined = 未取得（loading）、object = 取得済、 null = 取得失敗（見つからない）
-
+  // undefined = 譛ｪ蜿門ｾ暦ｼ・oading・峨｛bject = 蜿門ｾ玲ｸ医・null = 蜿門ｾ怜､ｱ謨暦ｼ郁ｦ九▽縺九ｉ縺ｪ縺・ｼ・
   const [cmsArticle, setCmsArticle] = React.useState(undefined);
-  // microCMS の記事リスト（関連記事抽出用）
-  const [cmsArticlesList, setCmsArticlesList] = React.useState([]);
-  // アイキャッチ画像の縦横判定フックは必ず呼ぶ
+  // microCMS 縺ｮ險倅ｺ九Μ繧ｹ繝茨ｼ磯未騾｣險倅ｺ区歓蜃ｺ逕ｨ・・  const [cmsArticlesList, setCmsArticlesList] = React.useState([]);
+  // 繧｢繧､繧ｭ繝｣繝・メ逕ｻ蜒上・邵ｦ讓ｪ蛻､螳壹ヵ繝・け縺ｯ蠢・★蜻ｼ縺ｶ
   const [isVertical, setIsVertical] = React.useState(false);
-  // postはuseMemoで取得されるため、imageUrlは毎回計算
-  const post = useMemo(() => {
-    // まずローカル記事を探す
-    const local = blogPosts.find(p => p.slug === id || p.id === id);
+  // post縺ｯuseMemo縺ｧ蜿門ｾ励＆繧後ｋ縺溘ａ縲（mageUrl縺ｯ豈主屓險育ｮ・  const post = useMemo(() => {
+    // 縺ｾ縺壹Ο繝ｼ繧ｫ繝ｫ險倅ｺ九ｒ謗｢縺・    const local = blogPosts.find(p => p.slug === id || p.id === id);
     if (local) return local;
-    // ローカルに無ければ microCMS記事（APIで取得結果）を返す
+    // 繝ｭ繝ｼ繧ｫ繝ｫ縺ｫ辟｡縺代ｌ縺ｰ microCMS險倅ｺ具ｼ・PI縺ｧ蜿門ｾ礼ｵ先棡・峨ｒ霑斐☆
     return cmsArticle;
   }, [id, cmsArticle]);
   const imageUrl = post?.image?.url || post?.image;
 
-  // ref: 本文コンテナを直接操作してリンクプレビュー挿入
+  // ref: 譛ｬ譁・さ繝ｳ繝・リ繧堤峩謗･謫堺ｽ懊＠縺ｦ繝ｪ繝ｳ繧ｯ繝励Ξ繝薙Η繝ｼ謖ｿ蜈･
   const articleContentRef = useRef(null);
 
   React.useEffect(() => {
-    // フックは必ず呼ばれる（条件分岐なし）
-    if (!imageUrl) {
+    // 繝輔ャ繧ｯ縺ｯ蠢・★蜻ｼ縺ｰ繧後ｋ・域擅莉ｶ蛻・ｲ舌↑縺暦ｼ・    if (!imageUrl) {
       setIsVertical(false);
       return;
     }
@@ -2226,40 +2208,36 @@ const ArticlePage = (props) => {
     };
   }, [imageUrl]);
 
-  // --- 追加: 記事の公開日 / 作成日 を安全に拾って日本ロケールで整形 ---
+  // --- 霑ｽ蜉: 險倅ｺ九・蜈ｬ髢区律 / 菴懈・譌･ 繧貞ｮ牙・縺ｫ諡ｾ縺｣縺ｦ譌･譛ｬ繝ｭ繧ｱ繝ｼ繝ｫ縺ｧ謨ｴ蠖｢ ---
   const publishedRaw = post?.publishedAt || post?.createdAt || post?.date || post?.published;
   const publishedDate = publishedRaw
     ? new Date(publishedRaw).toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' })
     : null;
 
-  // 目次とid付きHTML生成（useEffectより前に定義しておく）
-  const { toc, html: contentWithIds } = useMemo(() => generateTocAndContent(post?.content), [post]);
+  // 逶ｮ谺｡縺ｨid莉倥″HTML逕滓・・・seEffect繧医ｊ蜑阪↓螳夂ｾｩ縺励※縺翫￥・・  const { toc, html: contentWithIds } = useMemo(() => generateTocAndContent(post?.content), [post]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // ローカル記事がなければmicroCMS APIで取得（未取得フラグをセット）
-    const local = blogPosts.find(p => p.slug === id || p.id === id);
+    // 繝ｭ繝ｼ繧ｫ繝ｫ險倅ｺ九′縺ｪ縺代ｌ縺ｰmicroCMS API縺ｧ蜿門ｾ暦ｼ域悴蜿門ｾ励ヵ繝ｩ繧ｰ繧偵そ繝・ヨ・・    const local = blogPosts.find(p => p.slug === id || p.id === id);
     if (!local) {
       setCmsArticle(undefined); // loading
       fetchArticleById(id).then(data => setCmsArticle(data)).catch(() => setCmsArticle(null));
     } else {
-      // ローカル記事がある場合は CMS 側の状態をクリア
+      // 繝ｭ繝ｼ繧ｫ繝ｫ險倅ｺ九′縺ゅｋ蝣ｴ蜷医・ CMS 蛛ｴ縺ｮ迥ｶ諷九ｒ繧ｯ繝ｪ繧｢
       setCmsArticle(null);
     }
-    // 関連記事抽出のため microCMS の一覧を取得（軽量）
-    fetchArticles().then(data => {
+    // 髢｢騾｣險倅ｺ区歓蜃ｺ縺ｮ縺溘ａ microCMS 縺ｮ荳隕ｧ繧貞叙蠕暦ｼ郁ｻｽ驥擾ｼ・    fetchArticles().then(data => {
       if (data && Array.isArray(data.contents)) {
         setCmsArticlesList(data.contents);
       }
     }).catch(() => {});
   }, [id]);
 
-  // 記事本文の HTML に含まれるリンクを検出し、同一サイト内の記事リンクならプレビューに置換する
-  useEffect(() => {
+  // 險倅ｺ区悽譁・・ HTML 縺ｫ蜷ｫ縺ｾ繧後ｋ繝ｪ繝ｳ繧ｯ繧呈､懷・縺励∝酔荳繧ｵ繧､繝亥・縺ｮ險倅ｺ九Μ繝ｳ繧ｯ縺ｪ繧峨・繝ｬ繝薙Η繝ｼ縺ｫ鄂ｮ謠帙☆繧・  useEffect(() => {
     if (!articleContentRef.current) return;
     const container = articleContentRef.current;
 
-    // デバッグ: contentWithIds の中身（長さ）を表示
+    // 繝・ヰ繝・げ: contentWithIds 縺ｮ荳ｭ霄ｫ・磯聞縺包ｼ峨ｒ陦ｨ遉ｺ
     try {
       // eslint-disable-next-line no-console
       console.log('[ArticlePage] contentWithIds length:', contentWithIds ? String(contentWithIds.length) : 'null/undefined');
@@ -2271,10 +2249,9 @@ const ArticlePage = (props) => {
 
       anchors.forEach(a => {
         try {
-          // 既に変換済みなら何もしない（data 属性・クラス・内部構造のいずれかで判定）
-          if (a.dataset && a.dataset.previewApplied) return; // 既に処理済み
+          // 譌｢縺ｫ螟画鋤貂医∩縺ｪ繧我ｽ輔ｂ縺励↑縺・ｼ・ata 螻樊ｧ繝ｻ繧ｯ繝ｩ繧ｹ繝ｻ蜀・Κ讒矩縺ｮ縺・★繧後°縺ｧ蛻､螳夲ｼ・          if (a.dataset && a.dataset.previewApplied) return; // 譌｢縺ｫ蜃ｦ逅・ｸ医∩
           if (a.classList && (a.classList.contains('external-link') || a.classList.contains('link-preview'))) {
-            // 安全のためフラグをセット
+            // 螳牙・縺ｮ縺溘ａ繝輔Λ繧ｰ繧偵そ繝・ヨ
             if (a.dataset && !a.dataset.previewApplied) a.dataset.previewApplied = '1';
             return;
           }
@@ -2285,7 +2262,7 @@ const ArticlePage = (props) => {
           const href = a.getAttribute('href');
           if (!href) return;
 
-          // デバッグ
+          // 繝・ヰ繝・げ
           // eslint-disable-next-line no-console
           console.log('[ArticlePage] processing anchor:', href);
 
@@ -2306,7 +2283,7 @@ const ArticlePage = (props) => {
           }
 
           if (target) {
-            // 内部プレビュー
+            // 蜀・Κ繝励Ξ繝薙Η繝ｼ
             const imgSrc = target.image?.url || target.image || '/sample-images/no-image.jpg';
             const wrapper = document.createElement('div');
             wrapper.className = 'link-preview';
@@ -2328,7 +2305,7 @@ const ArticlePage = (props) => {
             a.classList.add('link-preview');
             a.dataset.previewApplied = '1';
           } else {
-            // 外部リンク
+            // 螟夜Κ繝ｪ繝ｳ繧ｯ
             const isHttp = /^https?:/.test(url.protocol);
             const isSameOrigin = url.origin === window.location.origin;
             if (isHttp && !isSameOrigin) {
@@ -2337,8 +2314,7 @@ const ArticlePage = (props) => {
               const wrapper = document.createElement('div');
               wrapper.className = 'ext-inner';
 
-              // ファビコンは表示しない（省略）。meta のみ作成。
-              const meta = document.createElement('div');
+              // 繝輔ぃ繝薙さ繝ｳ縺ｯ陦ｨ遉ｺ縺励↑縺・ｼ育怐逡･・峨Ｎeta 縺ｮ縺ｿ菴懈・縲・              const meta = document.createElement('div');
               meta.className = 'ext-meta';
 
               const titleDiv = document.createElement('div');
@@ -2354,7 +2330,7 @@ const ArticlePage = (props) => {
 
               wrapper.appendChild(meta);
 
-              // 追加: 外部感を示す小さな矢印アイコンを追加
+              // 霑ｽ蜉: 螟夜Κ諢溘ｒ遉ｺ縺吝ｰ上＆縺ｪ遏｢蜊ｰ繧｢繧､繧ｳ繝ｳ繧定ｿｽ蜉
               const arrow = document.createElement('span');
               arrow.className = 'ext-arrow';
               arrow.innerHTML = `
@@ -2382,8 +2358,7 @@ const ArticlePage = (props) => {
       });
     };
 
-    // 初回実行
-    processAnchors();
+    // 蛻晏屓螳溯｡・    processAnchors();
     window.mergeSeparatedExtInner && window.mergeSeparatedExtInner();
     window.hideTextOnlyExternalAnchors && window.hideTextOnlyExternalAnchors();
 
@@ -2450,27 +2425,26 @@ const ArticlePage = (props) => {
     
 
 
-    // --- 追加: クライアント側で分離している .ext-inner と隣接する a.external-link を統合する ---
+    // --- 霑ｽ蜉: 繧ｯ繝ｩ繧､繧｢繝ｳ繝亥・縺ｧ蛻・屬縺励※縺・ｋ .ext-inner 縺ｨ髫｣謗･縺吶ｋ a.external-link 繧堤ｵｱ蜷医☆繧・---
     
 
-    // --- 追加: テキストだけの a.external-link（URLそのものを表示しているもの）を非表示にする ---
-    
-
-
-
-
-
-    // --- 追加: クライアント側で分離している .ext-inner と隣接する a.external-link を統合する ---
-    
-
-    // --- 追加: テキストのみの a.external-link を非表示にする（URLだけのもの） ---
+    // --- 霑ｽ蜉: 繝・く繧ｹ繝医□縺代・ a.external-link・・RL縺昴・繧ゅ・繧定｡ｨ遉ｺ縺励※縺・ｋ繧ゅ・・峨ｒ髱櫁｡ｨ遉ｺ縺ｫ縺吶ｋ ---
     
 
 
 
 
-    // MutationObserver で遅延挿入されるリンクに対応する
-    let observer = null;
+
+    // --- 霑ｽ蜉: 繧ｯ繝ｩ繧､繧｢繝ｳ繝亥・縺ｧ蛻・屬縺励※縺・ｋ .ext-inner 縺ｨ髫｣謗･縺吶ｋ a.external-link 繧堤ｵｱ蜷医☆繧・---
+    
+
+    // --- 霑ｽ蜉: 繝・く繧ｹ繝医・縺ｿ縺ｮ a.external-link 繧帝撼陦ｨ遉ｺ縺ｫ縺吶ｋ・・RL縺縺代・繧ゅ・・・---
+    
+
+
+
+
+    // MutationObserver 縺ｧ驕・ｻｶ謖ｿ蜈･縺輔ｌ繧九Μ繝ｳ繧ｯ縺ｫ蟇ｾ蠢懊☆繧・    let observer = null;
     try {
       observer = new MutationObserver(mutations => {
         let shouldProcess = false;
@@ -2481,79 +2455,70 @@ const ArticlePage = (props) => {
           }
         }
         if (shouldProcess) {
-          // 小さな遅延で再処理
-          setTimeout(()=>{ processAnchors(); window.mergeSeparatedExtInner && window.mergeSeparatedExtInner(); window.hideTextOnlyExternalAnchors && window.hideTextOnlyExternalAnchors(); }, 50);
+          // 蟆上＆縺ｪ驕・ｻｶ縺ｧ蜀榊・逅・          setTimeout(()=>{ processAnchors(); window.mergeSeparatedExtInner && window.mergeSeparatedExtInner(); window.hideTextOnlyExternalAnchors && window.hideTextOnlyExternalAnchors(); }, 50);
         }
       });
       observer.observe(container, { childList: true, subtree: true });
     } catch (e) {
-      // 観測に失敗しても問題ない
-    }
+      // 隕ｳ貂ｬ縺ｫ螟ｱ謨励＠縺ｦ繧ょ撫鬘後↑縺・    }
 
     return () => {
       if (observer) observer.disconnect();
     };
   }, [contentWithIds, cmsArticlesList]);
 
-  // AdSense広告の初期化
-  useEffect(() => {
+  // AdSense蠎・相縺ｮ蛻晄悄蛹・  useEffect(() => {
     if (window.adsbygoogle && adRef.current) {
       try {
         window.adsbygoogle.push({});
       } catch (e) {}
     }
   }, [id]);
-  // microCMS記事でも関連記事を表示（ローカル+CMS両方から抽出）
-  const allArticles = [
+  // microCMS險倅ｺ九〒繧る未騾｣險倅ｺ九ｒ陦ｨ遉ｺ・医Ο繝ｼ繧ｫ繝ｫ+CMS荳｡譁ｹ縺九ｉ謚ｽ蜃ｺ・・  const allArticles = [
     ...blogPosts,
     ...cmsArticlesList
   ];
-  // 正規化したカテゴリ名を返すユーティリティ
+  // 豁｣隕丞喧縺励◆繧ｫ繝・ざ繝ｪ蜷阪ｒ霑斐☆繝ｦ繝ｼ繝・ぅ繝ｪ繝・ぅ
   function getCategoryName(a) {
     if (!a) return undefined;
     if (a.category && typeof a.category === 'object') return a.category.name;
     return a.category;
   }
-  // 現在の投稿の正規カテゴリ名
-  const currentCatName = getCategoryName(post);
-  // slug/id を文字列化
-  const postSlug = post?.slug ? String(post.slug) : String(post?.id || '');
+  // 迴ｾ蝨ｨ縺ｮ謚慕ｨｿ縺ｮ豁｣隕上き繝・ざ繝ｪ蜷・  const currentCatName = getCategoryName(post);
+  // slug/id 繧呈枚蟄怜・蛹・  const postSlug = post?.slug ? String(post.slug) : String(post?.id || '');
   const related = allArticles.filter(p => {
     const pSlug = p.slug ? String(p.slug) : String(p.id || '');
-    // カテゴリ名が同じ、かつ自身以外
-    return getCategoryName(p) === currentCatName && pSlug !== postSlug;
+    // 繧ｫ繝・ざ繝ｪ蜷阪′蜷後§縲√°縺､閾ｪ霄ｫ莉･螟・    return getCategoryName(p) === currentCatName && pSlug !== postSlug;
   });
 
-  // ローカル記事もなく、まだ CMS からの取得が終わっていない場合は何も表示しない（フラッシュ防止）
-  const hasLocal = blogPosts.find(p => p.slug === id || p.id === id);
+  // 繝ｭ繝ｼ繧ｫ繝ｫ險倅ｺ九ｂ縺ｪ縺上√∪縺 CMS 縺九ｉ縺ｮ蜿門ｾ励′邨ゅｏ縺｣縺ｦ縺・↑縺・ｴ蜷医・菴輔ｂ陦ｨ遉ｺ縺励↑縺・ｼ医ヵ繝ｩ繝・す繝･髦ｲ豁｢・・  const hasLocal = blogPosts.find(p => p.slug === id || p.id === id);
   if (!post) {
     if (!hasLocal && cmsArticle === undefined) {
-      // loading: 表示を出さずフラッシュを防止
+      // loading: 陦ｨ遉ｺ繧貞・縺輔★繝輔Λ繝・す繝･繧帝亟豁｢
       return null;
     }
-    // 取得済みだが存在しない場合はメッセージ表示
-    return <ArticleContainer>記事が見つかりませんでした。</ArticleContainer>;
+    // 蜿門ｾ玲ｸ医∩縺縺悟ｭ伜惠縺励↑縺・ｴ蜷医・繝｡繝・そ繝ｼ繧ｸ陦ｨ遉ｺ
+    return <ArticleContainer>險倅ｺ九′隕九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆縲・/ArticleContainer>;
   }
 
 
   return (
     <>
-  {/* EyeCatch削除: 記事ごとの画像のみ表示 */}
+  {/* EyeCatch蜑企勁: 險倅ｺ九＃縺ｨ縺ｮ逕ｻ蜒上・縺ｿ陦ｨ遉ｺ */}
       <ArticleContainer>
         <ArticleTitle>{post.title}</ArticleTitle>
         <div style={{display:'flex', justifyContent:'center', position: 'relative'}}>
-          {/* 日付を画像の上、右寄せでオーバーレイ表示 */}
+          {/* 譌･莉倥ｒ逕ｻ蜒上・荳翫∝承蟇・○縺ｧ繧ｪ繝ｼ繝舌・繝ｬ繧､陦ｨ遉ｺ */}
           {publishedDate && (
             <ArticleDate>
-              {publishedDate} に公開
-            </ArticleDate>
+              {publishedDate} 縺ｫ蜈ｬ髢・            </ArticleDate>
           )}
           <ArticleImageEyeCatch src={imageUrl} alt={post.title} className={isVertical ? 'vertical' : ''} />
         </div>
-        {/* 目次 */}
+        {/* 逶ｮ谺｡ */}
         {toc.length > 0 && (
-          <TocContainer aria-label="目次">
-            <strong style={{color:'#1B5E20'}}>目次</strong>
+          <TocContainer aria-label="逶ｮ谺｡">
+            <strong style={{color:'#1B5E20'}}>逶ｮ谺｡</strong>
             <TocList>
               {toc.map(item => (
                 <TocItem key={item.id} className={`toc-${item.tag}`}>
@@ -2564,7 +2529,7 @@ const ArticlePage = (props) => {
           </TocContainer>
         )}
         <ArticleContent ref={articleContentRef} dangerouslySetInnerHTML={{ __html: contentWithIds }} />
-        {/* Google AdSense in-article広告ユニット */}
+        {/* Google AdSense in-article蠎・相繝ｦ繝九ャ繝・*/}
         <div style={{margin: '32px 0', display: 'flex', justifyContent: 'center'}}>
           <ins className="adsbygoogle"
             style={{ display: 'block', textAlign: 'center' }}
@@ -2577,7 +2542,7 @@ const ArticlePage = (props) => {
         </div>
         {related.length > 0 && (
           <RelatedSection>
-            <RelatedTitle><FaLink /> 関連ページ</RelatedTitle>
+            <RelatedTitle><FaLink /> 髢｢騾｣繝壹・繧ｸ</RelatedTitle>
             <RelatedList>
               {related.map(r => {
                 const relImg = r.image?.url || r.image;
@@ -2593,8 +2558,7 @@ const ArticlePage = (props) => {
            </RelatedSection>
          )}
         <BackLink to="/">
-          <FaArrowLeft /> トップページへ戻る
-        </BackLink>
+          <FaArrowLeft /> 繝医ャ繝励・繝ｼ繧ｸ縺ｸ謌ｻ繧・        </BackLink>
       </ArticleContainer>
     </>
   );
