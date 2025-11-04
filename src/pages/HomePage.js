@@ -130,6 +130,9 @@ const categories = [
   { key: 'train', label: '鉄道', cmsName: '鉄道', icon: <FaTrain /> }
 ];
 
+// トップページで表示する記事の最大総数（変更可能）
+const MAX_TOP_ARTICLES = 16;
+
 const HomePage = () => {
   const [cmsArticles, setCmsArticles] = useState([]);
 
@@ -142,6 +145,9 @@ const HomePage = () => {
       }
     });
   }, []);
+
+  // 各カテゴリごとの表示件数を自動計算（総数 = MAX_TOP_ARTICLES）
+  const perCategoryLimit = Math.ceil(MAX_TOP_ARTICLES / categories.length);
 
   // microCMS記事のみ表示
   return (
@@ -157,7 +163,7 @@ const HomePage = () => {
           }
           return post.category === cat.key;
         });
-        const postsToShow = cmsForCat.slice(0, 4);
+  const postsToShow = cmsForCat.slice(0, perCategoryLimit);
         return (
           <CategorySection key={cat.key}>
             <CategoryHeader>
