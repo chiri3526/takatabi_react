@@ -302,7 +302,7 @@ const ArticleContent = styled.div`
     gap: 0.8em;
     align-items: center;
     border: 1px solid #e6f4ea;
-    background: #fff;
+    background: transparent;
     padding: 0.4rem;
     border-radius: 8px;
     margin-top: 0.6rem;
@@ -315,7 +315,7 @@ const ArticleContent = styled.div`
     object-fit: cover;
     border-radius: 6px;
     flex-shrink: 0;
-    background: #fff;
+    background: transparent;
   }
   .link-preview .lp-title {
     font-weight: 700;
@@ -427,14 +427,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -546,14 +546,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -665,14 +665,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -784,14 +784,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -903,14 +903,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1022,14 +1022,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1141,14 +1141,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1260,14 +1260,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1379,14 +1379,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1498,14 +1498,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1617,14 +1617,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1736,14 +1736,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1855,14 +1855,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -1974,14 +1974,14 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 700px !important;
+    max-width: 920px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     margin: 1.6em auto;
     display: block;
-    background: #fff;
-    padding: 8px;
+    background: transparent;
+    padding: 0;
   }
 
   /* 横長カードを確実にするための微調整 */
@@ -2052,7 +2052,7 @@ const ArticleContainer = styled.div`
   max-width: 1100px;
   min-width: 320px;
   margin: 40px auto;
-  background: #fff;
+  background: transparent;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   padding: ${theme.spacing.xlarge};
@@ -2073,7 +2073,7 @@ const ArticleImageEyeCatch = styled.img`
   object-fit: cover;
   border-radius: 18px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.13);
-  background: #fff;
+  background: transparent;
   margin-bottom: 1.5em;
 `;
 // 小さく表示する日付コンポーネント（アイキャッチ上に右寄せでオーバーレイ表示）
