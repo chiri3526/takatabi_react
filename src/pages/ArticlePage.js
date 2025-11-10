@@ -2080,6 +2080,10 @@ const ArticleTitle = styled.h1`
   font-size: 1.2rem; // 小さめに変更
   color: ${theme.colors.primary};
   margin-bottom: ${theme.spacing.medium};
+  /* 左右に余白を追加 */
+  padding-left: 10px;
+  padding-right: 10px;
+  box-sizing: border-box;
 `;
 const ArticleImageEyeCatch = styled.img`
   width: 100%;
