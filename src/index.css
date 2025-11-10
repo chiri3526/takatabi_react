@@ -30,3 +30,12 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+/* Override Emotion-generated class padding to enlarge images on small screens.
+   Note: Emotion generates class names like .css-1hkxg; these can change between builds.
+   If you want a permanent fix, adjust the source styled-component instead. */
+@media (max-width: 900px) {
+  .css-1hkxg {
+    padding: 0 !important;
+  }
+}

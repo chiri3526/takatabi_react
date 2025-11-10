@@ -288,6 +288,14 @@ const ArticleContent = styled.div`
   line-height: 1.7;
   font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
 
+  /* 本文（段落・リスト）の左右余白を20pxに設定。
+     見出しは既存スタイル（border/背景など）を維持するため変更しない。 */
+  p, li {
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+  }
+
   /* 本文内リンクの折り返しと最大幅制御 */
   a {
     overflow-wrap: anywhere;
@@ -386,6 +394,9 @@ const ArticleContent = styled.div`
     font-size: 1.3rem;
     border-left: 7px solid ${theme.colors.primary};
     border-radius: 0 12px 12px 0;
+    /* 増加: h2 の背景縦幅を広くするため上下パディングを追加 */
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
     padding-left: 0.7em;
     margin: 2em 0 1em 0;
     font-weight: bold;
@@ -399,6 +410,9 @@ const ArticleContent = styled.div`
     font-weight: bold;
     border-left: 5px solid ${theme.colors.secondary};
     border-radius: 0 10px 10px 0;
+    /* 増加: 背景の縦幅を広くするため上下のパディングを確保 */
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
     padding-left: 0.6em;
     background: #eaffea;
     font-family: 'Rounded Mplus 1c', 'Noto Sans JP', 'Meiryo', 'Hiragino Maru Gothic Pro', Arial, sans-serif;
