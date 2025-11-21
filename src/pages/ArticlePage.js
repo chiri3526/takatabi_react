@@ -95,14 +95,9 @@ function generateTocAndContent(html) {
           const isSameOrigin = url.origin === window.location.origin;
           if (isHttp && !isSameOrigin) {
             const domain = url.hostname.replace(/^www\./, '');
-            // 既に同じ href の external-link が container 内にあれば重複作成をスキップ
-              try {
-                const existing = doc.querySelector(`a.external-link[href="${href}"]`);
-                if (existing) {
-                  if (a.dataset) a.dataset.previewApplied = '1';
-                  return;
-                }
-              } catch (e) { }
+            // 既存の external-link があっても上書きして一貫したプレビューにする。
+            // （以前の実装は既存があればスキップしていたため、別の処理で変換済みの要素が
+            // あるとここで何も起きず見た目が変わらない問題があった。）
 
 
             // ext-inner を作って内部を構築
@@ -224,9 +219,9 @@ const ArticleContent = styled.div`
     gap: 0.8rem;
     border: 1px solid #e9f5ef;
     background: linear-gradient(180deg,#ffffff,#f8fff8);
-    padding: 0.45rem 0.9rem;
+    padding: 5px 10px; /* 上下5px、左右10px */
     border-radius: 10px;
-    margin: 0.6rem 0;
+    margin: 0; /* 上下のマージンを0に */
     width: 100%;
     box-sizing: border-box;
     position: relative;
@@ -262,7 +257,7 @@ const ArticleContent = styled.div`
     gap: 0.8rem;
     border: 1px solid #e9f5ef;
     background: linear-gradient(180deg,#ffffff,#f8fff8);
-    padding: 0.45rem 0.9rem;
+    padding: 0; /* padding not needed */
     border-radius: 10px;
     margin: 0.6rem 0;
     text-decoration: none;
@@ -274,13 +269,13 @@ const ArticleContent = styled.div`
     position: relative;
   }
   .external-link:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,128,64,0.08); }
-  .external-link .ext-inner { display:flex; flex-direction:row; align-items:center; gap:0.8rem; width:100%; min-width:0; flex:1 1 auto; padding-right:40px; }
+  .external-link .ext-inner { display:flex; flex-direction:row; align-items:center; gap:0.8rem; width:100%; min-width:0; flex:1 1 auto; padding-right:0; }
   .external-link .ext-meta { display:flex; flex-direction:column; min-width:0; flex:1 1 auto; overflow:hidden; }
   .external-link .ext-title { font-weight:700; color: #2E7D32; font-size:0.95rem; line-height:1.25; white-space:normal; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
   .external-link .ext-domain { font-size:0.78rem; color: #21212188; margin-top:0.18rem; white-space:normal; word-break:break-all; }
   .external-link .ext-arrow { position:absolute; right:12px; top:50%; transform:translateY(-50%); width:16px; height:16px; display:flex; align-items:center; justify-content:center; color:#2E7D32; pointer-events:none; }
   .external-link .ext-arrow svg { width:100%; height:100%; display:block; stroke:currentColor; vector-effect:non-scaling-stroke; }
-  @media (max-width:600px) { .external-link{padding:0.36rem 0.6rem;} .external-link .ext-inner{gap:0.6rem; padding-right:36px;} .external-link .ext-title{font-size:0.92rem; -webkit-line-clamp:2;} .external-link .ext-domain{font-size:0.75rem;} .external-link .ext-arrow{right:10px; width:14px; height:14px;} }
+  @media (max-width:600px) { .external-link{padding:0;} .external-link .ext-inner{gap:0.6rem; padding-right:0;} .external-link .ext-title{font-size:0.92rem; -webkit-line-clamp:2;} .external-link .ext-domain{font-size:0.75rem;} .external-link .ext-arrow{right:10px; width:14px; height:14px;} }
 
 
   color: ${theme.colors.text};
