@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
-import { fetchArticles } from '../api/microcms';
+import { fetchArticles, fetchRecommendedArticles } from '../api/microcms';
 
-import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain, FaStar } from 'react-icons/fa';
 
 const TopLogo = styled.div`
   width: 100%;
@@ -130,11 +130,32 @@ const categories = [
   { key: 'train', label: '鉄道', cmsName: '鉄道', icon: <FaTrain /> }
 ];
 
+// おすすめ記事用のスタイル
+const RecommendedSection = styled.section`
+  margin-bottom: ${theme.spacing.xlarge};
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: ${theme.spacing.large};
+  border-radius: 12px;
+`;
+
+const RecommendedBadge = styled.span`
+  display: inline-block;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #8b5a00;
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  margin-bottom: 0.5em;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+`;
+
 // トップページで表示する記事の最大総数（変更可能）
 const MAX_TOP_ARTICLES = 16;
 
 const HomePage = () => {
   const [cmsArticles, setCmsArticles] = useState([]);
+  const [recommendedArticles, setRecommendedArticles] = useState([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -144,10 +165,76 @@ const HomePage = () => {
         setCmsArticles(data.contents);
       }
     });
+    
+    // おすすめ記事を取得
+    fetchRecommendedArticles().then(data => {
+      if (data && data.contents) {
+        setRecommendedArticles(data.contents);
+      }
+    });
   }, []);
 
   // 各カテゴリごとの表示件数を自動計算（総数 = MAX_TOP_ARTICLES）
   const perCategoryLimit = Math.ceil(MAX_TOP_ARTICLES / categories.length);
+
+  // おすすめ記事を表示するコンポーネント
+  const renderRecommendedArticles = () => {
+    if (recommendedArticles.length === 0) return null;
+
+    return (
+      <RecommendedSection>
+        <CategoryHeader>
+          <CategoryIcon><FaStar /></CategoryIcon>
+          <CategoryTitle>おすすめ記事</CategoryTitle>
+        </CategoryHeader>
+        <BlogGrid>
+          {recommendedArticles.map(post => {
+            // タグを複数扱えるように配列に正規化
+            const tagField = post.tag || post.tags || null;
+            let tagLabels = [];
+            if (Array.isArray(tagField) && tagField.length > 0) {
+              tagLabels = tagField
+                .map(t => (t && typeof t === 'object') ? (t.name || t.id || '') : String(t))
+                .filter(Boolean);
+            } else if (typeof tagField === 'string') {
+              tagLabels = [tagField];
+            } else if (tagField && typeof tagField === 'object') {
+              const label = tagField.name || tagField.id || '';
+              if (label) tagLabels = [label];
+            }
+
+            return (
+              <Link
+                to={`/?p=${post.slug || post.id}`}
+                key={post.id}
+                style={{ textDecoration: 'none' }}
+              >
+                <BlogCard>
+                  <BlogImage
+                    src={post.image?.url || post.image}
+                    alt={post.title}
+                    onError={(e) => { e.target.src = '/sample-images/no-image.jpg'; }}
+                  />
+                  <BlogContent>
+                    {/* おすすめバッジ */}
+                    <RecommendedBadge>⭐ おすすめ</RecommendedBadge>
+                    {/* タグ表示（複数あればすべて表示） */}
+                    {tagLabels.length > 0 && tagLabels.map((lbl, idx) => (
+                      <TagBadge key={`${lbl}-${idx}`}>{lbl}</TagBadge>
+                    ))}
+                    {/* 作成日 */}
+                    <DateText>{formatDate(post.publishedAt || post.createdAt || post.updatedAt)}</DateText>
+                    <BlogTitle>{post.title}</BlogTitle>
+                    <BlogExcerpt>{post.excerpt}</BlogExcerpt>
+                  </BlogContent>
+                </BlogCard>
+              </Link>
+            );
+          })}
+        </BlogGrid>
+      </RecommendedSection>
+    );
+  };
 
   // microCMS記事のみ表示
   return (
@@ -155,6 +242,10 @@ const HomePage = () => {
       <TopLogo>
         <img src={takatabi1} alt="takatabi" style={{width:'50%', height:'70px', borderRadius:'0'}} />
       </TopLogo>
+      
+      {/* おすすめ記事セクション */}
+      {renderRecommendedArticles()}
+      
       {categories.map(cat => {
         // microCMS記事のみ抽出
         const cmsForCat = cmsArticles.filter(post => {

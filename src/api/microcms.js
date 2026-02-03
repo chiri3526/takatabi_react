@@ -16,6 +16,17 @@ export const fetchArticles = async () => {
   return res.data;
 };
 
+// おすすめ記事を取得する関数を追加
+export const fetchRecommendedArticles = async () => {
+  const res = await axios.get(
+    `https://${SERVICE_DOMAIN}.microcms.io/api/v1/articles?filters=recommend_order[exists]&orders=recommend_order&limit=${ARTICLES_FETCH_LIMIT}`,
+    {
+      headers: { "X-API-KEY": API_KEY },
+    }
+  );
+  return res.data;
+};
+
 export const fetchArticleById = async (id) => {
   const res = await axios.get(
     `https://${SERVICE_DOMAIN}.microcms.io/api/v1/articles/${id}`,
