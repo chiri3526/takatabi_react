@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
-import { FaChevronDown, FaChevronRight } from 'react-icons/fa';
+import { FaChevronDown, FaChevronRight, FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain, FaHome, FaInfoCircle, FaEnvelope } from 'react-icons/fa';
 
 const SidebarContainer = styled.div`
   position: fixed;
@@ -70,12 +70,50 @@ const CategoryItem = styled.li`
   a {
     text-decoration: none;
     color: ${theme.colors.text};
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 
     &:hover {
       color: ${theme.colors.primary};
     }
   }
+`;
+
+const CategoryLink = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: ${theme.colors.text};
+  text-decoration: none;
+
+  &:hover {
+    color: ${theme.colors.primary};
+  }
+`;
+
+const CategoryIcon = styled.div`
+  color: ${props => props.color || theme.colors.primary};
+  font-size: 1.2rem;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const InformationSection = styled.div`
+  margin-top: 2rem;
+  padding: 0 ${theme.spacing.medium};
+`;
+
+const SectionTitle = styled.h3`
+  color: ${theme.colors.text}99;
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 `;
 
 const SubCategoryItem = styled.li`
@@ -99,6 +137,8 @@ const categories = [
     id: 1,
     name: '国内旅行',
     slug: 'domestic',
+    icon: <FaMapMarkerAlt />,
+    color: '#28a745'
     /* 詳細分類は一時的に非表示にするためコメントアウト（将来再表示可能）
     children: [
       { id: 11, name: '北海道', slug: 'hokkaido' },
@@ -114,9 +154,51 @@ const categories = [
     ]
     */
   },
-  { id: 2, name: '海外旅行', slug: 'overseas' },
-  { id: 3, name: 'ラウンジ', slug: 'lounge' },
-  { id: 4, name: '鉄道', slug: 'train' }
+  { 
+    id: 2, 
+    name: '海外旅行', 
+    slug: 'overseas',
+    icon: <FaGlobeAsia />,
+    color: '#28a745'
+  },
+  { 
+    id: 3, 
+    name: 'ラウンジ', 
+    slug: 'lounge',
+    icon: <FaCouch />,
+    color: '#28a745'
+  },
+  { 
+    id: 4, 
+    name: '鉄道', 
+    slug: 'train',
+    icon: <FaTrain />,
+    color: '#28a745'
+  }
+];
+
+const informationItems = [
+  {
+    id: 'home',
+    name: 'Home',
+    link: '/',
+    icon: <FaHome />,
+    color: '#28a745'
+  },
+  {
+    id: 'about',
+    name: 'About Us',
+    link: '/about',
+    icon: <FaInfoCircle />,
+    color: '#28a745'
+  },
+  {
+    id: 'contact',
+    name: 'Contact',
+    link: '/contact',
+    icon: <FaEnvelope />,
+    color: '#28a745'
+  }
 ];
 
 const Sidebar = () => {
@@ -143,12 +225,17 @@ const Sidebar = () => {
             <CategoryItem key={category.id}>
               {category.children ? (
                 <>
-                  <span style={{ fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={() => toggleSub(category.id)}>
-                    <span style={{ marginRight: '0.5em', fontSize: '1em' }}>
+                  <CategoryLink onClick={() => toggleSub(category.id)}>
+                    <CategoryIcon color={category.color}>
+                      {category.icon}
+                    </CategoryIcon>
+                    <span style={{ fontWeight: 'bold', flex: 1 }}>
+                      {category.name}
+                    </span>
+                    <span style={{ fontSize: '0.8em' }}>
                       {openSub[category.id] ? <FaChevronDown /> : <FaChevronRight />}
                     </span>
-                    {category.name}
-                  </span>
+                  </CategoryLink>
                   {openSub[category.id] && (
                     <SubCategoryList>
                       {category.children.map(sub => (
@@ -163,12 +250,31 @@ const Sidebar = () => {
                 </>
               ) : (
                 <Link to={`/?category=${category.slug}`} onClick={() => setIsOpen(false)}>
-                  {category.name}
+                  <CategoryIcon color={category.color}>
+                    {category.icon}
+                  </CategoryIcon>
+                  <span>{category.name}</span>
                 </Link>
               )}
             </CategoryItem>
           ))}
         </CategoryList>
+        
+        <InformationSection>
+          <SectionTitle>Information</SectionTitle>
+          <CategoryList>
+            {informationItems.map(item => (
+              <CategoryItem key={item.id}>
+                <Link to={item.link} onClick={() => setIsOpen(false)}>
+                  <CategoryIcon color={item.color}>
+                    {item.icon}
+                  </CategoryIcon>
+                  <span>{item.name}</span>
+                </Link>
+              </CategoryItem>
+            ))}
+          </CategoryList>
+        </InformationSection>
       </SidebarContainer>
     </>
   );
