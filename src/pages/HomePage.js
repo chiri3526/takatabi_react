@@ -81,6 +81,12 @@ const BlogTitle = styled.h2`
   color: ${theme.colors.text};
   margin: 0 0 ${theme.spacing.small};
   font-size: 1rem; // 小さめに変更
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1em * 1.4 * 3);
 `;
 
 const BlogExcerpt = styled.p`
@@ -133,9 +139,16 @@ const categories = [
 // おすすめ記事用のスタイル
 const RecommendedSection = styled.section`
   margin-bottom: ${theme.spacing.xlarge};
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #f6fff6 0%, #e7f7e7 100%);
   padding: ${theme.spacing.large};
-  border-radius: 12px;
+  border-radius: 16px;
+  border: 1px solid ${theme.colors.primary}22;
+  box-shadow: 0 4px 14px rgba(46, 125, 50, 0.08);
+
+  @media (min-width: 1024px) {
+    margin-left: ${theme.spacing.large};
+    margin-right: ${theme.spacing.large};
+  }
 `;
 
 const RecommendedBadge = styled.span`
