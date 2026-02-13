@@ -346,6 +346,26 @@ const HeroDate = styled(ArticleDate)`
   border: 1px solid #8fd89d55;
 `;
 
+const MobileHeroMeta = styled.div`
+  display: none;
+
+  @media (max-width: 600px) {
+    display: flex;
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    gap: 0.5rem;
+    z-index: 2;
+    flex-wrap: wrap;
+  }
+`;
+
+const MobileHeroDate = styled(ArticleDate)`
+  color: #ebf9ee;
+  background: rgba(41, 94, 51, 0.74);
+  border: 1px solid #8fd89d66;
+`;
+
 const ArticleImageWrap = styled.div`
   min-height: 420px;
   border-radius: 16px;
@@ -1284,17 +1304,25 @@ const ArticlePage = (props) => {
 
       <ArticleHeaderMobile>
         <ArticleTitle>{post.title}</ArticleTitle>
-        <ArticleMetaRow>
-          <ArticleDate><FaClock /> {readingMinutes} min read</ArticleDate>
-          {publishedDate && (
-            <ArticleDate dateTime={publishedRaw}>{publishedDate}</ArticleDate>
-          )}
-        </ArticleMetaRow>
+        {!imageUrl && (
+          <ArticleMetaRow>
+            <ArticleDate><FaClock /> {readingMinutes} min read</ArticleDate>
+            {publishedDate && (
+              <ArticleDate dateTime={publishedRaw}>{publishedDate}</ArticleDate>
+            )}
+          </ArticleMetaRow>
+        )}
       </ArticleHeaderMobile>
 
       {imageUrl && (
         <ArticleImageWrap>
           <ArticleImageEyeCatch src={imageUrl} alt={post.title} className={isVertical ? 'vertical' : ''} />
+          <MobileHeroMeta>
+            <MobileHeroDate><FaClock /> {readingMinutes} min read</MobileHeroDate>
+            {publishedDate && (
+              <MobileHeroDate dateTime={publishedRaw}>{publishedDate}</MobileHeroDate>
+            )}
+          </MobileHeroMeta>
           <ArticleHeader>
             <HeroTitle>{post.title}</HeroTitle>
             <HeroMetaRow>
