@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { theme } from '../styles/theme';
-import { FaLink, FaArrowLeft } from 'react-icons/fa';
+import { FaLink, FaArrowLeft, FaSearch, FaTag, FaClock, FaGlobeAsia } from 'react-icons/fa';
 import { fetchArticleById, fetchArticles } from '../api/microcms';
 
 // JSONファイルを一括取得（記事一覧を作るため）
@@ -174,8 +174,6 @@ function generateTocAndContent(html) {
   return { toc, html: newHtml };
 }
 
-const CONTENT_MAX_WIDTH = '760px';
-
 const TocList = styled.ul`
   list-style: none;
   margin: 0;
@@ -211,72 +209,155 @@ const TocLink = styled.a`
   }
 `;
 
-const ArticleContainer = styled.article`
-  width: min(92vw, 1160px);
-  margin: 36px auto 48px;
-  background: transparent;
-  padding: ${theme.spacing.xlarge};
+const TopNav = styled.header`
+  background: #ffffff;
+  border: 1px solid ${theme.colors.primary}22;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  @media (min-width: 1024px) {
+    padding: 14px 32px;
+  }
+`;
+
+const BrandHeader = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.48rem;
+`;
+
+const BrandIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${theme.colors.primary};
+  font-size: 1rem;
+`;
+
+const BrandText = styled.span`
+  color: ${theme.colors.primary};
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+`;
+
+const NavLinks = styled.nav`
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.4rem;
+  }
+`;
+
+const NavItem = styled(Link)`
+  color: ${theme.colors.text};
+  text-decoration: none;
+  font-size: 0.9rem;
+
+  &:hover {
+    color: ${theme.colors.primary};
+  }
+`;
+
+const SubscribeButton = styled.button`
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #42c95d 0%, #2e7d32 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+`;
+
+const ArticleContainer = styled.article`
+  width: min(96vw, 1280px);
+  margin: 18px auto 48px;
+  background: transparent;
+  padding: 0;
 
   @media (max-width: 1023px) {
     width: 94vw;
-    padding: ${theme.spacing.large};
   }
 `;
 
 const ArticleHeader = styled.header`
-  max-width: ${CONTENT_MAX_WIDTH};
-  margin: 0 auto;
+  max-width: 760px;
+  margin: 0 0 30px;
+  padding: 8px 16px 0;
 `;
 
 const ArticleTitle = styled.h1`
   margin: 0;
   color: ${theme.colors.primary};
-  font-size: clamp(1.55rem, 1.6vw, 2rem);
-  line-height: 1.4;
+  font-size: clamp(1.55rem, 2.2vw, 2.4rem);
+  line-height: 1.15;
 `;
 
 const ArticleMetaRow = styled.div`
-  margin-top: 10px;
-  margin-bottom: 18px;
+  margin-top: 30px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  gap: 0.6rem;
+
+  @media (max-width: 600px) {
+    margin-top: 0;
+  }
 `;
 
 const ArticleDate = styled.time`
   display: inline-flex;
   align-items: center;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: ${theme.colors.text}bb;
   background: #f7fbf7;
   border: 1px solid ${theme.colors.primary}33;
   border-radius: 999px;
-  padding: 0.25rem 0.6rem;
+  padding: 0.28rem 0.62rem;
 `;
 
 const ArticleImageWrap = styled.div`
-  max-width: ${CONTENT_MAX_WIDTH};
-  margin: 0 auto 28px;
+  min-height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 22px;
+  position: relative;
+  padding: 44px;
+  background: linear-gradient(180deg, rgba(10, 33, 16, 0.3), rgba(10, 33, 16, 0.52));
+  display: flex;
+  align-items: center;
+  isolation: isolate;
+
+  @media (max-width: 900px) {
+    min-height: 340px;
+    padding: 22px;
+  }
+
 `;
 
 const ArticleImageEyeCatch = styled.img`
+  position: absolute;
+  inset: 0;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  height: 100%;
   object-fit: cover;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.13);
-  background: transparent;
+  z-index: -1;
+  filter: saturate(0.95) contrast(1.04);
 `;
 
 const TocContainer = styled.nav`
-  max-width: ${CONTENT_MAX_WIDTH};
-  margin: 0 auto 28px;
+  margin: 0 0 24px;
   background: #f6fff6;
-  border: 2px solid ${theme.colors.primary};
+  border: 1px solid ${theme.colors.primary}2f;
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 16px;
 `;
 
 const TocTitle = styled.strong`
@@ -286,9 +367,118 @@ const TocTitle = styled.strong`
   font-size: 0.95rem;
 `;
 
+const ArticleBodyGrid = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  align-items: start;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ArticleMain = styled.section`
+  min-width: 0;
+  background: #f7faf7;
+  border: 1px solid ${theme.colors.primary}1f;
+  border-radius: 14px;
+  padding: 22px;
+`;
+
+const ArticleSidebar = styled.aside`
+  position: sticky;
+  top: 88px;
+  min-width: 0;
+
+  @media (max-width: 1100px) {
+    position: static;
+  }
+`;
+
+const SidebarCard = styled.section`
+  background: #f7faf7;
+  border: 1px solid ${theme.colors.primary}20;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+`;
+
+const SidebarTitle = styled.h3`
+  margin: 0 0 10px;
+  color: ${theme.colors.primary};
+  font-size: 0.95rem;
+  font-weight: 700;
+`;
+
+const SearchBox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid ${theme.colors.primary}26;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  color: ${theme.colors.primary};
+
+  input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.86rem;
+    background: transparent;
+  }
+`;
+
+const TagPillList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+`;
+
+const TagPill = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid ${theme.colors.primary}22;
+  background: #ecf8ec;
+  color: ${theme.colors.primary};
+  border-radius: 999px;
+  padding: 0.24rem 0.58rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+`;
+
+const SidebarPostList = styled.div`
+  display: grid;
+  gap: 10px;
+`;
+
+const SidebarPostItem = styled(Link)`
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+`;
+
+const SidebarPostThumb = styled.img`
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 8px;
+`;
+
+const SidebarPostTitle = styled.div`
+  font-size: 0.84rem;
+  line-height: 1.35;
+  color: ${theme.colors.text};
+  font-weight: 600;
+`;
+
 const ArticleContent = styled.div`
-  max-width: ${CONTENT_MAX_WIDTH};
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
   color: ${theme.colors.text};
   font-size: 1.03rem;
   line-height: 1.9;
@@ -540,15 +730,13 @@ const ArticleContent = styled.div`
 `;
 
 const AdContainer = styled.div`
-  max-width: ${CONTENT_MAX_WIDTH};
-  margin: 32px auto;
+  margin: 32px 0;
   display: flex;
   justify-content: center;
 `;
 
 const RelatedSection = styled.section`
-  max-width: ${CONTENT_MAX_WIDTH};
-  margin: 56px auto 0;
+  margin: 56px 0 0;
   padding-top: 24px;
   border-top: 1px solid ${theme.colors.primary}33;
 `;
@@ -618,8 +806,7 @@ const RelatedCardTitle = styled.div`
 `;
 
 const BackLinkWrap = styled.div`
-  max-width: ${CONTENT_MAX_WIDTH};
-  margin: 28px auto 0;
+  margin: 28px 0 0;
 `;
 
 const BackLink = styled(Link)`
@@ -1027,6 +1214,34 @@ const ArticlePage = (props) => {
     return getCategoryName(p) === currentCatName && pSlug !== postSlug;
   }).slice(0, 3);
 
+  const tagField = post?.tag || post?.tags || null;
+  const tagLabels = useMemo(() => {
+    if (Array.isArray(tagField)) {
+      return tagField
+        .map(t => (t && typeof t === 'object') ? (t.name || t.id || '') : String(t))
+        .filter(Boolean);
+    }
+    if (typeof tagField === 'string') return [tagField];
+    if (tagField && typeof tagField === 'object') {
+      const label = tagField.name || tagField.id || '';
+      return label ? [label] : [];
+    }
+    return [];
+  }, [tagField]);
+
+  const popularPosts = allArticles
+    .filter(p => {
+      const pSlug = p.slug ? String(p.slug) : String(p.id || '');
+      return pSlug !== postSlug;
+    })
+    .slice(0, 4);
+
+  const readingMinutes = useMemo(() => {
+    const plain = String(post?.content || '').replace(/<[^>]+>/g, ' ');
+    const words = plain.trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(3, Math.ceil(words / 220));
+  }, [post]);
+
   // ローカル記事もなく、まだ CMS からの取得が終わっていない場合は何も表示しない（フラッシュ防止）
   const hasLocal = blogPosts.find(p => p.slug === id || p.id === id);
   if (!post) {
@@ -1041,13 +1256,28 @@ const ArticlePage = (props) => {
 
   return (
     <ArticleContainer>
+      <TopNav>
+        <BrandHeader>
+          <BrandIcon><FaGlobeAsia /></BrandIcon>
+          <BrandText>takatabi</BrandText>
+        </BrandHeader>
+        <NavLinks>
+          <NavItem to="/?category=domestic">国内旅行</NavItem>
+          <NavItem to="/?category=overseas">海外旅行</NavItem>
+          <NavItem to="/?category=lounge">ラウンジ</NavItem>
+          <NavItem to="/?category=train">鉄道</NavItem>
+        </NavLinks>
+        <SubscribeButton>Subscribe</SubscribeButton>
+      </TopNav>
+
       <ArticleHeader>
         <ArticleTitle>{post.title}</ArticleTitle>
-        {publishedDate && (
-          <ArticleMetaRow>
-            <ArticleDate dateTime={publishedRaw}>{publishedDate} に公開</ArticleDate>
-          </ArticleMetaRow>
-        )}
+        <ArticleMetaRow>
+          <ArticleDate><FaClock /> {readingMinutes} min read</ArticleDate>
+          {publishedDate && (
+            <ArticleDate dateTime={publishedRaw}>{publishedDate}</ArticleDate>
+          )}
+        </ArticleMetaRow>
       </ArticleHeader>
 
       {imageUrl && (
@@ -1056,62 +1286,102 @@ const ArticlePage = (props) => {
         </ArticleImageWrap>
       )}
 
-      {toc.length > 0 && (
-        <TocContainer aria-label="目次">
-          <TocTitle>目次</TocTitle>
-          <TocList>
-            {toc.map(item => (
-              <TocItem key={item.id} className={`toc-${item.tag}`}>
-                <TocLink
-                  href={`#${item.id}`}
-                  className={activeHeadingId === item.id ? 'active' : ''}
-                  aria-current={activeHeadingId === item.id ? 'location' : undefined}
-                >
-                  {item.text}
-                </TocLink>
-              </TocItem>
-            ))}
-          </TocList>
-        </TocContainer>
-      )}
+      <ArticleBodyGrid>
+        <ArticleMain>
+          {toc.length > 0 && (
+            <TocContainer aria-label="目次">
+              <TocTitle>Table of Contents</TocTitle>
+              <TocList>
+                {toc.map(item => (
+                  <TocItem key={item.id} className={`toc-${item.tag}`}>
+                    <TocLink
+                      href={`#${item.id}`}
+                      className={activeHeadingId === item.id ? 'active' : ''}
+                      aria-current={activeHeadingId === item.id ? 'location' : undefined}
+                    >
+                      {item.text}
+                    </TocLink>
+                  </TocItem>
+                ))}
+              </TocList>
+            </TocContainer>
+          )}
 
-      <ArticleContent ref={articleContentRef} dangerouslySetInnerHTML={{ __html: contentWithIds }} />
+          <ArticleContent ref={articleContentRef} dangerouslySetInnerHTML={{ __html: contentWithIds }} />
 
-      <AdContainer>
-        <ins
-          className="adsbygoogle"
-          style={{ display: 'block', textAlign: 'center' }}
-          data-ad-layout="in-article"
-          data-ad-format="fluid"
-          data-ad-client="ca-pub-7728107798566122"
-          data-ad-slot="5951785085"
-          ref={adRef}
-        ></ins>
-      </AdContainer>
+          <AdContainer>
+            <ins
+              className="adsbygoogle"
+              style={{ display: 'block', textAlign: 'center' }}
+              data-ad-layout="in-article"
+              data-ad-format="fluid"
+              data-ad-client="ca-pub-7728107798566122"
+              data-ad-slot="5951785085"
+              ref={adRef}
+            ></ins>
+          </AdContainer>
 
-      {related.length > 0 && (
-        <RelatedSection>
-          <RelatedTitle><FaLink /> 関連ページ</RelatedTitle>
-          <RelatedList>
-            {related.map(r => {
-              const relImg = r.image?.url || r.image;
-              const relLink = `/?p=${r.slug || r.id}`;
-              return (
-                <RelatedCard to={relLink} key={r.slug || r.id}>
-                  <RelatedImage src={relImg} alt={r.title} />
-                  <RelatedCardTitle>{r.title}</RelatedCardTitle>
-                </RelatedCard>
-              );
-            })}
-          </RelatedList>
-        </RelatedSection>
-      )}
+          {related.length > 0 && (
+            <RelatedSection>
+              <RelatedTitle><FaLink /> 関連ページ</RelatedTitle>
+              <RelatedList>
+                {related.map(r => {
+                  const relImg = r.image?.url || r.image;
+                  const relLink = `/?p=${r.slug || r.id}`;
+                  return (
+                    <RelatedCard to={relLink} key={r.slug || r.id}>
+                      <RelatedImage src={relImg} alt={r.title} />
+                      <RelatedCardTitle>{r.title}</RelatedCardTitle>
+                    </RelatedCard>
+                  );
+                })}
+              </RelatedList>
+            </RelatedSection>
+          )}
 
-      <BackLinkWrap>
-        <BackLink to="/">
-          <FaArrowLeft /> トップページへ戻る
-        </BackLink>
-      </BackLinkWrap>
+          <BackLinkWrap>
+            <BackLink to="/">
+              <FaArrowLeft /> トップページへ戻る
+            </BackLink>
+          </BackLinkWrap>
+        </ArticleMain>
+
+        <ArticleSidebar>
+          <SidebarCard>
+            <SidebarTitle>Search</SidebarTitle>
+            <SearchBox>
+              <FaSearch />
+              <input placeholder="Search..." aria-label="search" />
+            </SearchBox>
+          </SidebarCard>
+
+          <SidebarCard>
+            <SidebarTitle>Tags</SidebarTitle>
+            <TagPillList>
+              {tagLabels.length > 0 ? tagLabels.map(tag => (
+                <TagPill key={tag}><FaTag /> {tag}</TagPill>
+              )) : (
+                <TagPill><FaTag /> travel</TagPill>
+              )}
+            </TagPillList>
+          </SidebarCard>
+
+          <SidebarCard>
+            <SidebarTitle>Popular Posts</SidebarTitle>
+            <SidebarPostList>
+              {popularPosts.map(p => {
+                const thumb = p.image?.url || p.image || '/sample-images/no-image.jpg';
+                return (
+                  <SidebarPostItem to={`/?p=${p.slug || p.id}`} key={p.slug || p.id}>
+                    <SidebarPostThumb src={thumb} alt={p.title} />
+                    <SidebarPostTitle>{p.title}</SidebarPostTitle>
+                  </SidebarPostItem>
+                );
+              })}
+            </SidebarPostList>
+          </SidebarCard>
+        </ArticleSidebar>
+      </ArticleBodyGrid>
     </ArticleContainer>
   );
 };
