@@ -146,23 +146,6 @@ function generateTocAndContent(html) {
           // 個別アンカーの変換エラーは無視
         }
       });
-      // --- 追加: サーバ側で同一 href の external-link を重複削除 ---
-      try {
-        const seen = new Set();
-        const anchorsAll = Array.from(doc.querySelectorAll('a.external-link'));
-        anchorsAll.forEach(el => {
-          try {
-            const href0 = el.getAttribute('href');
-            if (!href0) return;
-            if (seen.has(href0)) {
-              el.parentNode && el.parentNode.removeChild(el);
-            } else {
-              seen.add(href0);
-            }
-          } catch (e) {}
-        });
-      } catch (e) {}
-
       // シリアライズして戻す
       newHtml = doc.body.innerHTML;// シリアライズして戻す
       newHtml = doc.body.innerHTML;
@@ -277,27 +260,31 @@ const SubscribeButton = styled.button`
 `;
 
 const ArticleContainer = styled.article`
-  width: min(96vw, 1280px);
+  width: min(90vw, 1200px);
   margin: 18px auto 48px;
   background: transparent;
   padding: 0;
 
   @media (max-width: 1023px) {
-    width: 94vw;
+    width: 92vw;
   }
 `;
 
-const ArticleHeader = styled.header`
+const ArticleHeaderMobile = styled.header`
   max-width: 760px;
   margin: 0 0 30px;
   padding: 8px 16px 0;
+
+  @media (min-width: 601px) {
+    display: none;
+  }
 `;
 
 const ArticleTitle = styled.h1`
   margin: 0;
   color: ${theme.colors.primary};
   font-size: clamp(1.55rem, 2.2vw, 2.4rem);
-  line-height: 1.15;
+  line-height: 1.6;
 `;
 
 const ArticleMetaRow = styled.div`
@@ -312,6 +299,36 @@ const ArticleMetaRow = styled.div`
   }
 `;
 
+const ArticleHeader = styled.header`
+  max-width: 760px;
+  margin: 0;
+  padding: 26px 28px;
+  border-radius: 20px;
+  background: rgba(17, 23, 18, 0.36);
+  backdrop-filter: blur(2px);
+  z-index: 2;
+
+  @media (max-width: 600px) {
+    display: none;
+  }
+`;
+
+const HeroTitle = styled.h1`
+  margin: 0;
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.4);
+  font-size: clamp(2rem, 3vw, 3.25rem);
+  line-height: 1.08;
+`;
+
+const HeroMetaRow = styled.div`
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.6rem;
+`;
+
 const ArticleDate = styled.time`
   display: inline-flex;
   align-items: center;
@@ -323,6 +340,12 @@ const ArticleDate = styled.time`
   padding: 0.28rem 0.62rem;
 `;
 
+const HeroDate = styled(ArticleDate)`
+  color: #ebf9ee;
+  background: rgba(41, 94, 51, 0.7);
+  border: 1px solid #8fd89d55;
+`;
+
 const ArticleImageWrap = styled.div`
   min-height: 420px;
   border-radius: 16px;
@@ -332,7 +355,8 @@ const ArticleImageWrap = styled.div`
   padding: 44px;
   background: linear-gradient(180deg, rgba(10, 33, 16, 0.3), rgba(10, 33, 16, 0.52));
   display: flex;
-  align-items: center;
+  align-items: flex-end;
+  justify-content: flex-start;
   isolation: isolate;
 
   @media (max-width: 900px) {
@@ -917,14 +941,12 @@ const ArticlePage = (props) => {
 
       anchors.forEach(a => {
         try {
-          // 既に変換済みなら何もしない（data 属性・クラス・内部構造のいずれかで判定）
-          if (a.dataset && a.dataset.previewApplied) return; // 既に処理済み
-          if (a.classList && (a.classList.contains('external-link') || a.classList.contains('link-preview'))) {
-            // 安全のためフラグをセット
-            if (a.dataset && !a.dataset.previewApplied) a.dataset.previewApplied = '1';
-            return;
-          }
-          if (a.querySelector && (a.querySelector('.ext-inner') || a.querySelector('.link-preview'))) {
+          // 既に変換済みの内部リンクプレビューはスキップ
+          if (a.classList && a.classList.contains('link-preview')) return;
+          if (a.querySelector && a.querySelector('.link-preview')) return;
+
+          // 正常な外部リンクカードはスキップ。壊れた外部リンクは再構築する。
+          if (a.classList && a.classList.contains('external-link') && a.querySelector('.ext-inner')) {
             if (a.dataset && !a.dataset.previewApplied) a.dataset.previewApplied = '1';
             return;
           }
@@ -973,6 +995,7 @@ const ArticlePage = (props) => {
             a.appendChild(wrapper);
             a.classList.add('link-preview');
             a.dataset.previewApplied = '1';
+            a.dataset.previewHref = url.href;
           } else {
             // 外部リンク
             const isHttp = /^https?:/.test(url.protocol);
@@ -1016,6 +1039,7 @@ const ArticlePage = (props) => {
               a.setAttribute('target', '_blank');
               a.setAttribute('rel', 'noopener noreferrer');
               a.dataset.previewApplied = '1';
+              a.dataset.previewHref = url.href;
 
               // eslint-disable-next-line no-console
               console.log('[ArticlePage] converted external link:', href, '->', domain);
@@ -1028,92 +1052,23 @@ const ArticlePage = (props) => {
       });
     };
 
+    const removeDuplicatePreviewCards = () => {
+      const seen = new Set();
+      const previewAnchors = Array.from(container.querySelectorAll('a.link-preview[data-preview-href]'));
+      previewAnchors.forEach(a => {
+        const href = a.dataset.previewHref;
+        if (!href) return;
+        if (seen.has(href)) {
+          a.remove();
+          return;
+        }
+        seen.add(href);
+      });
+    };
+
     // 初回実行
     processAnchors();
-    window.mergeSeparatedExtInner && window.mergeSeparatedExtInner();
-    window.hideTextOnlyExternalAnchors && window.hideTextOnlyExternalAnchors();
-
-
-    // --- converted: global utility functions for merging/hiding external links ---
-    window.mergeSeparatedExtInner = function() {
-      try {
-        const containerEl = articleContentRef?.current || document.body;
-        if (!containerEl) return;
-        const inners = Array.from(containerEl.querySelectorAll('.ext-inner'));
-        inners.forEach(inner => {
-          // skip if already inside an anchor
-          if (inner.closest('a.external-link')) return;
-          // find nearest anchor siblings that share the same href
-  // hrefCandidates / aSiblings removed (unused)
-          // collect anchors that have same href and are adjacent to this inner
-          let anchor = null;
-          // look back
-          let prev = inner.previousElementSibling;
-          while(prev) { if (prev.tagName === 'A' && prev.classList.contains('external-link')) { anchor = prev; break; } prev = prev.previousElementSibling; }
-          // look forward if not found
-          if (!anchor) { let next = inner.nextElementSibling; while(next) { if (next.tagName === 'A' && next.classList.contains('external-link')) { anchor = next; break; } next = next.nextElementSibling; } }
-          // if anchor still not found, try to find any anchor that has same href as inner's internal anchors
-          if (!anchor) { const innerA = inner.querySelector('a.external-link'); const href = innerA ? innerA.getAttribute('href') : null; if (href) { anchor = Array.from(containerEl.querySelectorAll('a.external-link')).find(x=>x.getAttribute('href')===href); } }
-          // if still not found, create one and insert before inner
-          if (!anchor) { anchor = document.createElement('a'); anchor.className = 'external-link'; const innerA = inner.querySelector('a.external-link'); if (innerA && innerA.getAttribute('href')) anchor.setAttribute('href', innerA.getAttribute('href')); anchor.setAttribute('target','_blank'); anchor.setAttribute('rel','noopener noreferrer'); anchor.dataset.previewApplied = '1'; inner.parentNode.insertBefore(anchor, inner); }
-          // move arrow if exists in adjacent anchor
-          const possibleArrowAnchor = inner.nextElementSibling && inner.nextElementSibling.tagName==='A' && inner.nextElementSibling.classList.contains('external-link') && inner.nextElementSibling.querySelector('.ext-arrow') ? inner.nextElementSibling : null;
-          if (possibleArrowAnchor) {
-            const arrow = possibleArrowAnchor.querySelector('.ext-arrow');
-            if (arrow) anchor.appendChild(arrow);
-            try { possibleArrowAnchor.parentNode.removeChild(possibleArrowAnchor); } catch (e) {}
-          }
-          // replace any anchors inside inner with spans to avoid nested anchors
-          const innerAnchors = Array.from(inner.querySelectorAll('a.external-link'));
-          innerAnchors.forEach(aEl => { try { const span = document.createElement('span'); span.className = 'ext-link-text'; span.textContent = aEl.textContent || aEl.getAttribute('href') || ''; aEl.parentNode.replaceChild(span, aEl); } catch(e){} });
-          // finally append inner into anchor
-          try { anchor.appendChild(inner); } catch(e){}
-        });
-      } catch(e) {}
-        };
-        window.hideTextOnlyExternalAnchors = function() {
-      try {
-        const containerEl = articleContentRef?.current || document.body;
-        if (!containerEl) return;
-        const anchors = Array.from(containerEl.querySelectorAll('a.external-link'));
-        anchors.forEach(a => {
-          try {
-            // skip anchors that have structured content or arrow inside
-            if (a.querySelector('.ext-inner') || a.querySelector('.ext-arrow')) return;
-            const href = (a.getAttribute('href') || '').trim();
-            const txt = (a.textContent || '').trim();
-            if (!href) return;
-            if (!txt) { a.style.display = 'none'; return; }
-            // if text exactly equals href (or equals href without protocol), hide it
-            const noProto = href.replace(/^https?:\/\//, '');
-            if (txt === href || txt === noProto) {
-              a.style.display = 'none';
-            }
-          } catch (e) {}
-        });
-      } catch (e) {}
-        };
-    
-
-
-    // --- 追加: クライアント側で分離している .ext-inner と隣接する a.external-link を統合する ---
-    
-
-    // --- 追加: テキストだけの a.external-link（URLそのものを表示しているもの）を非表示にする ---
-    
-
-
-
-
-
-    // --- 追加: クライアント側で分離している .ext-inner と隣接する a.external-link を統合する ---
-    
-
-    // --- 追加: テキストのみの a.external-link を非表示にする（URLだけのもの） ---
-    
-
-
-
+    removeDuplicatePreviewCards();
 
     // MutationObserver で遅延挿入されるリンクに対応する
     let observer = null;
@@ -1128,7 +1083,10 @@ const ArticlePage = (props) => {
         }
         if (shouldProcess) {
           // 小さな遅延で再処理
-          setTimeout(()=>{ processAnchors(); window.mergeSeparatedExtInner && window.mergeSeparatedExtInner(); window.hideTextOnlyExternalAnchors && window.hideTextOnlyExternalAnchors(); }, 50);
+          setTimeout(() => {
+            processAnchors();
+            removeDuplicatePreviewCards();
+          }, 50);
         }
       });
       observer.observe(container, { childList: true, subtree: true });
@@ -1270,7 +1228,19 @@ const ArticlePage = (props) => {
         <SubscribeButton>Subscribe</SubscribeButton>
       </TopNav>
 
+      {!imageUrl && (
       <ArticleHeader>
+        <HeroTitle>{post.title}</HeroTitle>
+        <HeroMetaRow>
+          <HeroDate><FaClock /> {readingMinutes} min read</HeroDate>
+          {publishedDate && (
+            <HeroDate dateTime={publishedRaw}>{publishedDate}</HeroDate>
+          )}
+        </HeroMetaRow>
+      </ArticleHeader>
+      )}
+
+      <ArticleHeaderMobile>
         <ArticleTitle>{post.title}</ArticleTitle>
         <ArticleMetaRow>
           <ArticleDate><FaClock /> {readingMinutes} min read</ArticleDate>
@@ -1278,11 +1248,20 @@ const ArticlePage = (props) => {
             <ArticleDate dateTime={publishedRaw}>{publishedDate}</ArticleDate>
           )}
         </ArticleMetaRow>
-      </ArticleHeader>
+      </ArticleHeaderMobile>
 
       {imageUrl && (
         <ArticleImageWrap>
           <ArticleImageEyeCatch src={imageUrl} alt={post.title} className={isVertical ? 'vertical' : ''} />
+          <ArticleHeader>
+            <HeroTitle>{post.title}</HeroTitle>
+            <HeroMetaRow>
+              <HeroDate><FaClock /> {readingMinutes} min read</HeroDate>
+              {publishedDate && (
+                <HeroDate dateTime={publishedRaw}>{publishedDate}</HeroDate>
+              )}
+            </HeroMetaRow>
+          </ArticleHeader>
         </ArticleImageWrap>
       )}
 
