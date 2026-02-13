@@ -1081,9 +1081,35 @@ const ArticlePage = (props) => {
       });
     };
 
+    const removeDuplicateExternalCards = () => {
+      const seen = new Set();
+      const externalAnchors = Array.from(container.querySelectorAll('a.external-link'));
+      externalAnchors.forEach(a => {
+        const inner = a.querySelector('.ext-inner');
+        const title = a.querySelector('.ext-title');
+        // 正常なカード構造でないものは削除
+        if (!inner || !title) {
+          a.remove();
+          return;
+        }
+        const href = a.dataset.previewHref || a.getAttribute('href') || '';
+        if (!href) {
+          a.remove();
+          return;
+        }
+        // 同一URLの外部リンクカードは先頭1件だけ残す
+        if (seen.has(href)) {
+          a.remove();
+          return;
+        }
+        seen.add(href);
+      });
+    };
+
     // 初回実行
     processAnchors();
     removeDuplicatePreviewCards();
+    removeDuplicateExternalCards();
 
     // MutationObserver で遅延挿入されるリンクに対応する
     let observer = null;
@@ -1101,6 +1127,7 @@ const ArticlePage = (props) => {
           setTimeout(() => {
             processAnchors();
             removeDuplicatePreviewCards();
+            removeDuplicateExternalCards();
           }, 50);
         }
       });
