@@ -1,17 +1,95 @@
 import React, { useEffect, useState } from 'react';
-import takatabi1 from '../contents/LP/takatabi1.png';
 import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
 import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain } from 'react-icons/fa';
 import { fetchArticles } from '../api/microcms';
 
+const PageShell = styled.div`
+  background: linear-gradient(180deg, #f3f8f3 0%, #edf6ed 100%);
+  min-height: 100vh;
+`;
+
+const TopNav = styled.header`
+  background: #ffffff;
+  border-bottom: 1px solid ${theme.colors.primary}22;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  @media (min-width: 1024px) {
+    padding: 14px 32px;
+  }
+`;
+
+const BrandHeader = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.48rem;
+`;
+
+const BrandIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: ${theme.colors.primary};
+  font-size: 1rem;
+`;
+
+const BrandText = styled.span`
+  color: ${theme.colors.primary};
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+`;
+
+const NavLinks = styled.nav`
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.4rem;
+  }
+`;
+
+const NavItem = styled(Link)`
+  color: ${props => (props.$active ? theme.colors.primary : theme.colors.text)};
+  font-weight: ${props => (props.$active ? 700 : 400)};
+  text-decoration: none;
+  font-size: 0.9rem;
+
+  &:hover {
+    color: ${theme.colors.primary};
+  }
+`;
+
+const SubscribeButton = styled.button`
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #42c95d 0%, #2e7d32 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+`;
+
+const ContentWrap = styled.div`
+  width: min(1160px, 94vw);
+  margin: 26px auto 0;
+`;
+
 const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
   /* 上は元の余白を保持し、左と下に余白を追加 */
-  margin: ${theme.spacing.large} 0 ${theme.spacing.large} ${theme.spacing.medium};
+  margin: ${theme.spacing.large} 0 ${theme.spacing.large};
   color: ${theme.colors.primary};
   text-decoration: none;
   font-weight: bold;
@@ -96,24 +174,6 @@ function formatDate(iso) {
   }
 }
 
-const TopLogo = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 0;
-
-  img {
-    width: 50%;
-    height: 70px;
-    border-radius: 0;
-    object-fit: contain;
-    margin: 0 auto;
-    display: block;
-  }
-`;
-
-
 const categories = [
   { key: 'domestic', label: '国内旅行', cmsName: '国内旅行', icon: <FaMapMarkerAlt /> },
   { key: 'overseas', label: '海外旅行', cmsName: '海外旅行', icon: <FaGlobeAsia /> },
@@ -142,12 +202,24 @@ const CategoryPage = ({ category }) => {
     return post.category === category;
   });
   return (
-    <div>
-      <TopLogo>
-        <img src={takatabi1} alt="takatabi" style={{width:'50%', height:'70px', borderRadius:'0'}} />
-      </TopLogo>
-      <BlogGrid>
-        {posts.map(post => {
+    <PageShell>
+      <TopNav>
+        <BrandHeader>
+          <BrandIcon><FaGlobeAsia /></BrandIcon>
+          <BrandText>takatabi</BrandText>
+        </BrandHeader>
+        <NavLinks>
+          <NavItem to="/?category=domestic" $active={category === 'domestic'}>国内旅行</NavItem>
+          <NavItem to="/?category=overseas" $active={category === 'overseas'}>海外旅行</NavItem>
+          <NavItem to="/?category=lounge" $active={category === 'lounge'}>ラウンジ</NavItem>
+          <NavItem to="/?category=train" $active={category === 'train'}>鉄道</NavItem>
+        </NavLinks>
+        <SubscribeButton>Subscribe</SubscribeButton>
+      </TopNav>
+
+      <ContentWrap>
+        <BlogGrid>
+          {posts.map(post => {
           // タグを複数扱えるように配列に正規化
           const tagField = post.tag || post.tags || null;
           let tagLabels = [];
@@ -197,12 +269,13 @@ const CategoryPage = ({ category }) => {
               </BlogCard>
             </Link>
           );
-        })}
-      </BlogGrid>
-      <BackLink to="/">
-        トップページへ戻る
-      </BackLink>
-    </div>
+          })}
+        </BlogGrid>
+        <BackLink to="/">
+          トップページへ戻る
+        </BackLink>
+      </ContentWrap>
+    </PageShell>
   );
 };
 
