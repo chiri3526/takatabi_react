@@ -578,6 +578,20 @@ const ArticleContent = styled.div`
   }
 
   .link-preview {
+    display: block;
+    margin: 0.7rem 0;
+    text-decoration: none;
+    color: inherit;
+    border: none;
+    background: transparent;
+    padding: 0;
+  }
+
+  .link-preview:empty {
+    display: none;
+  }
+
+  .link-preview .lp-inner {
     display: flex;
     gap: 0.8em;
     align-items: center;
@@ -585,12 +599,9 @@ const ArticleContent = styled.div`
     background: transparent;
     padding: 0.5rem;
     border-radius: 10px;
-    margin: 0.7rem 0;
-    text-decoration: none;
-    color: inherit;
   }
 
-  .link-preview img {
+  .link-preview .lp-inner img {
     width: 84px;
     height: 56px;
     object-fit: cover;
@@ -599,7 +610,7 @@ const ArticleContent = styled.div`
     background: transparent;
   }
 
-  .link-preview .lp-title {
+  .link-preview .lp-inner .lp-title {
     font-weight: 700;
     color: ${theme.colors.primary};
     font-size: 0.92rem;
@@ -977,7 +988,7 @@ const ArticlePage = (props) => {
             // 内部プレビュー
             const imgSrc = target.image?.url || target.image || '/sample-images/no-image.jpg';
             const wrapper = document.createElement('div');
-            wrapper.className = 'link-preview';
+            wrapper.className = 'lp-inner';
 
             const img = document.createElement('img');
             img.src = imgSrc;
@@ -1056,6 +1067,10 @@ const ArticlePage = (props) => {
       const seen = new Set();
       const previewAnchors = Array.from(container.querySelectorAll('a.link-preview[data-preview-href]'));
       previewAnchors.forEach(a => {
+        if (!a.querySelector('.lp-inner') || !a.querySelector('.lp-title')) {
+          a.remove();
+          return;
+        }
         const href = a.dataset.previewHref;
         if (!href) return;
         if (seen.has(href)) {
