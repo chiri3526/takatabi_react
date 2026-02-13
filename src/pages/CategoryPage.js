@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { theme } from '../styles/theme';
 import { FaMapMarkerAlt, FaGlobeAsia, FaCouch, FaTrain } from 'react-icons/fa';
 import { fetchArticles } from '../api/microcms';
@@ -135,6 +135,35 @@ const BlogGrid = styled.div`
   gap: ${theme.spacing.large};
   padding: ${theme.spacing.medium};
 `;
+
+const PaginationWrap = styled.nav`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 6px 0 18px;
+  flex-wrap: wrap;
+`;
+
+const PageButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 0.7rem;
+  border-radius: 8px;
+  border: 1px solid ${props => (props.$active ? theme.colors.primary : `${theme.colors.primary}33`)};
+  background: ${props => (props.$active ? theme.colors.primary : '#f6fff6')};
+  color: ${props => (props.$active ? '#fff' : theme.colors.primary)};
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: ${props => (props.$active ? 700 : 500)};
+
+  &:hover {
+    background: ${props => (props.$active ? theme.colors.primary : '#e8f5e9')};
+  }
+`;
 const BlogCard = styled.article`
   background: ${theme.colors.white};
   border-radius: 8px;
@@ -208,9 +237,11 @@ const categories = [
   { key: 'lounge', label: 'ラウンジ', cmsName: 'ラウンジ', icon: <FaCouch /> },
   { key: 'train', label: '鉄道', cmsName: '鉄道', icon: <FaTrain /> }
 ];
+const POSTS_PER_PAGE = 12;
 
 
 const CategoryPage = ({ category }) => {
+  const location = useLocation();
   const [cmsArticles, setCmsArticles] = useState([]);
 
   useEffect(() => {
@@ -223,12 +254,26 @@ const CategoryPage = ({ category }) => {
 
   const cat = categories.find(c => c.key === category);
   // microCMS記事のみ表示
-  const posts = cmsArticles.filter(post => {
+  const posts = useMemo(() => cmsArticles.filter(post => {
+    if (!cat) return false;
     if (post.category && typeof post.category === 'object') {
       return post.category.name === cat.cmsName;
     }
     return post.category === category;
-  });
+  }), [cmsArticles, category, cat]);
+
+  const pageParam = Number.parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
+  const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
+  const currentPage = Number.isFinite(pageParam)
+    ? Math.min(Math.max(pageParam, 1), totalPages)
+    : 1;
+  const pagedPosts = posts.slice((currentPage - 1) * POSTS_PER_PAGE, currentPage * POSTS_PER_PAGE);
+
+  const makePageHref = (page) => `/?category=${category}&page=${page}`;
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [category, currentPage]);
   return (
     <PageShell>
       <TopNav>
@@ -251,7 +296,7 @@ const CategoryPage = ({ category }) => {
           <CategoryHeroTitle>{cat?.label || 'カテゴリ'}</CategoryHeroTitle>
         </CategoryHero>
         <BlogGrid>
-          {posts.map(post => {
+          {pagedPosts.map(post => {
           // タグを複数扱えるように配列に正規化
           const tagField = post.tag || post.tags || null;
           let tagLabels = [];
@@ -303,6 +348,26 @@ const CategoryPage = ({ category }) => {
           );
           })}
         </BlogGrid>
+        {totalPages > 1 && (
+          <PaginationWrap aria-label="ページ送り">
+            {currentPage > 1 && (
+              <PageButton to={makePageHref(currentPage - 1)}>前へ</PageButton>
+            )}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+              <PageButton
+                key={page}
+                to={makePageHref(page)}
+                $active={page === currentPage}
+                aria-current={page === currentPage ? 'page' : undefined}
+              >
+                {page}
+              </PageButton>
+            ))}
+            {currentPage < totalPages && (
+              <PageButton to={makePageHref(currentPage + 1)}>次へ</PageButton>
+            )}
+          </PaginationWrap>
+        )}
         <BackLink to="/">
           トップページへ戻る
         </BackLink>
