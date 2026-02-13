@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styled from '@emotion/styled';
+import { keyframes } from '@emotion/react';
 import { Link } from 'react-router-dom';
 import { theme } from '../styles/theme';
 import { fetchArticles, fetchRecommendedArticles } from '../api/microcms';
-import heroImage from '../contents/photo/kyoto.jpg';
 
 import {
   FaArrowRight,
@@ -95,9 +95,8 @@ const HeroSection = styled.section`
   width: min(100%, 1280px);
   min-height: 420px;
   border-radius: 0;
-  background-image: linear-gradient(180deg, rgba(17, 40, 17, 0.38), rgba(17, 40, 17, 0.55)), url(${heroImage});
-  background-size: cover;
-  background-position: center;
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -112,6 +111,26 @@ const HeroSection = styled.section`
 
 const HeroInner = styled.div`
   max-width: 760px;
+  position: relative;
+  z-index: 2;
+`;
+
+const fadeOut = keyframes`
+  from { opacity: 1; }
+  to { opacity: 0; }
+`;
+
+const HeroBackground = styled.div`
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(180deg, rgba(17, 40, 17, 0.38), rgba(17, 40, 17, 0.55)), url(${props => props.$bgImage || '/sample-images/no-image.jpg'});
+  background-size: cover;
+  background-position: center;
+  z-index: ${props => props.$zIndex || 0};
+`;
+
+const HeroPrevBackground = styled(HeroBackground)`
+  animation: ${fadeOut} 1.6s ease forwards;
 `;
 
 const HeroEyebrow = styled.span`
@@ -535,11 +554,14 @@ const categories = [
   { key: 'train', label: '鉄道', cmsName: '鉄道', icon: <FaTrain /> }
 ];
 
-const MAX_TOP_ARTICLES = 16;
+const CATEGORY_POST_LIMIT = 3;
 
 const HomePage = () => {
   const [cmsArticles, setCmsArticles] = useState([]);
   const [recommendedArticles, setRecommendedArticles] = useState([]);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [prevHeroImage, setPrevHeroImage] = useState(null);
+  const prevHeroIndexRef = useRef(0);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -556,7 +578,41 @@ const HomePage = () => {
     });
   }, []);
 
-  const perCategoryLimit = Math.ceil(MAX_TOP_ARTICLES / categories.length);
+  const perCategoryLimit = CATEGORY_POST_LIMIT;
+
+  const heroImages = useMemo(() => {
+    const urls = [...recommendedArticles, ...cmsArticles]
+      .map(post => post?.image?.url || post?.image)
+      .filter(Boolean)
+      .filter(url => typeof url === 'string');
+    return [...new Set(urls)];
+  }, [recommendedArticles, cmsArticles]);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return undefined;
+    const intervalId = window.setInterval(() => {
+      setHeroIndex(prev => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => window.clearInterval(intervalId);
+  }, [heroImages]);
+
+  useEffect(() => {
+    setHeroIndex(0);
+    setPrevHeroImage(null);
+    prevHeroIndexRef.current = 0;
+  }, [heroImages.length]);
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return undefined;
+    const prevIndex = prevHeroIndexRef.current;
+    if (prevIndex !== heroIndex) {
+      setPrevHeroImage(heroImages[prevIndex] || null);
+      prevHeroIndexRef.current = heroIndex;
+      const timeoutId = window.setTimeout(() => setPrevHeroImage(null), 1600);
+      return () => window.clearTimeout(timeoutId);
+    }
+    return undefined;
+  }, [heroIndex, heroImages]);
 
   const latestFeature = useMemo(() => cmsArticles[0] || recommendedArticles[0] || null, [cmsArticles, recommendedArticles]);
   const trendingPosts = useMemo(() => {
@@ -638,6 +694,10 @@ const HomePage = () => {
       </TopNav>
 
       <HeroSection>
+        <HeroBackground $bgImage={heroImages[heroIndex]} $zIndex={0} />
+        {prevHeroImage && (
+          <HeroPrevBackground key={prevHeroImage} $bgImage={prevHeroImage} $zIndex={1} />
+        )}
         <HeroInner>
           <HeroEyebrow>DISCOVER NATURE</HeroEyebrow>
           <HeroTitle>
