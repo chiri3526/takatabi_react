@@ -84,12 +84,34 @@ const ContentWrap = styled.div`
   margin: 26px auto 0;
 `;
 
+const CategoryHero = styled.section`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0 4px;
+`;
+
+const CategoryHeroIcon = styled.div`
+  color: ${theme.colors.primary};
+  font-size: 2.5rem;
+  margin-bottom: 0.5em;
+`;
+
+const CategoryHeroTitle = styled.h2`
+  font-family: ${theme.font.family};
+  font-weight: ${theme.font.weightBold};
+  color: ${theme.colors.primary};
+  font-size: 1.5rem;
+  margin: 0;
+  text-align: center;
+`;
+
 const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.5em;
-  /* 上は元の余白を保持し、左と下に余白を追加 */
-  margin: ${theme.spacing.large} 0 ${theme.spacing.large};
+  margin: ${theme.spacing.large} 0 ${theme.spacing.large} ${theme.spacing.medium};
   color: ${theme.colors.primary};
   text-decoration: none;
   font-weight: bold;
@@ -135,6 +157,12 @@ const BlogTitle = styled.h2`
   color: ${theme.colors.text};
   margin: 0 0 ${theme.spacing.small};
   font-size: 1rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(1em * 1.4 * 3);
 `;
 const BlogExcerpt = styled.p`
   color: ${theme.colors.text};
@@ -218,6 +246,10 @@ const CategoryPage = ({ category }) => {
       </TopNav>
 
       <ContentWrap>
+        <CategoryHero>
+          <CategoryHeroIcon>{cat?.icon || <FaGlobeAsia />}</CategoryHeroIcon>
+          <CategoryHeroTitle>{cat?.label || 'カテゴリ'}</CategoryHeroTitle>
+        </CategoryHero>
         <BlogGrid>
           {posts.map(post => {
           // タグを複数扱えるように配列に正規化

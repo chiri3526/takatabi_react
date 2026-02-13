@@ -130,7 +130,7 @@ const HeroBackground = styled.div`
 `;
 
 const HeroPrevBackground = styled(HeroBackground)`
-  animation: ${fadeOut} 1.6s ease forwards;
+  animation: ${fadeOut} 2s ease forwards;
 `;
 
 const HeroEyebrow = styled.span`
@@ -561,7 +561,7 @@ const HomePage = () => {
   const [recommendedArticles, setRecommendedArticles] = useState([]);
   const [heroIndex, setHeroIndex] = useState(0);
   const [prevHeroImage, setPrevHeroImage] = useState(null);
-  const prevHeroIndexRef = useRef(0);
+  const prevDisplayedHeroRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -587,6 +587,7 @@ const HomePage = () => {
       .filter(url => typeof url === 'string');
     return [...new Set(urls)];
   }, [recommendedArticles, cmsArticles]);
+  const currentHeroImage = heroImages.length ? heroImages[heroIndex % heroImages.length] : null;
 
   useEffect(() => {
     if (heroImages.length <= 1) return undefined;
@@ -597,22 +598,21 @@ const HomePage = () => {
   }, [heroImages]);
 
   useEffect(() => {
-    setHeroIndex(0);
-    setPrevHeroImage(null);
-    prevHeroIndexRef.current = 0;
-  }, [heroImages.length]);
-
-  useEffect(() => {
-    if (heroImages.length <= 1) return undefined;
-    const prevIndex = prevHeroIndexRef.current;
-    if (prevIndex !== heroIndex) {
-      setPrevHeroImage(heroImages[prevIndex] || null);
-      prevHeroIndexRef.current = heroIndex;
-      const timeoutId = window.setTimeout(() => setPrevHeroImage(null), 1600);
+    if (!currentHeroImage) {
+      setPrevHeroImage(null);
+      prevDisplayedHeroRef.current = null;
+      return undefined;
+    }
+    const prevImage = prevDisplayedHeroRef.current;
+    if (prevImage && prevImage !== currentHeroImage) {
+      setPrevHeroImage(prevImage);
+      const timeoutId = window.setTimeout(() => setPrevHeroImage(null), 2000);
+      prevDisplayedHeroRef.current = currentHeroImage;
       return () => window.clearTimeout(timeoutId);
     }
+    prevDisplayedHeroRef.current = currentHeroImage;
     return undefined;
-  }, [heroIndex, heroImages]);
+  }, [currentHeroImage]);
 
   const latestFeature = useMemo(() => cmsArticles[0] || recommendedArticles[0] || null, [cmsArticles, recommendedArticles]);
   const trendingPosts = useMemo(() => {
@@ -694,7 +694,7 @@ const HomePage = () => {
       </TopNav>
 
       <HeroSection>
-        <HeroBackground $bgImage={heroImages[heroIndex]} $zIndex={0} />
+        <HeroBackground $bgImage={currentHeroImage} $zIndex={0} />
         {prevHeroImage && (
           <HeroPrevBackground key={prevHeroImage} $bgImage={prevHeroImage} $zIndex={1} />
         )}
