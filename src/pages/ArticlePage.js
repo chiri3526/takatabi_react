@@ -27,19 +27,22 @@ const blogPosts = [
 
 // Google AdSense script を head に挿入するユーティリティ（重複挿入を防止）
 function useAdsenseScript() {
-  // 実行環境でのみ DOM にスクリプトを挿入
-  try {
-    if (typeof document === 'undefined') return;
-    if (!document.querySelector('script[src*="adsbygoogle.js?client=ca-pub-7728107798566122"]')) {
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7728107798566122';
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
+  useEffect(() => {
+    // 実行環境でのみ DOM にスクリプトを挿入
+    try {
+      if (typeof document === 'undefined') return undefined;
+      if (!document.querySelector('script[src*="adsbygoogle.js?client=ca-pub-7728107798566122"]')) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7728107798566122';
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+      }
+    } catch (e) {
+      // サーバーサイド環境やテスト環境では無視
     }
-  } catch (e) {
-    // サーバーサイド環境やテスト環境では無視
-  }
+    return undefined;
+  }, []);
 }
 
 // 目次生成関数
@@ -530,6 +533,15 @@ const ArticleContent = styled.div`
 
   p {
     margin: 0 0 1.05em;
+    max-width: 920px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (min-width: 1024px) {
+    p {
+      max-width: 760px;
+    }
   }
 
   ul,
@@ -731,7 +743,7 @@ const ArticleContent = styled.div`
   .cms-image {
     border-radius: 16px;
     width: 100% !important;
-    max-width: 920px !important;
+    max-width: 520px !important;
     height: auto !important;
     object-fit: contain;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
@@ -1208,11 +1220,29 @@ const ArticlePage = (props) => {
 
   // AdSense広告の初期化
   useEffect(() => {
-    if (window.adsbygoogle && adRef.current) {
-      try {
-        window.adsbygoogle.push({});
-      } catch (e) {}
-    }
+    let cancelled = false;
+    let retries = 0;
+
+    const initializeAd = () => {
+      if (cancelled || !adRef.current) return;
+
+      if (window.adsbygoogle && typeof window.adsbygoogle.push === 'function') {
+        try {
+          window.adsbygoogle.push({});
+        } catch (e) {}
+        return;
+      }
+
+      if (retries < 20) {
+        retries += 1;
+        window.setTimeout(initializeAd, 150);
+      }
+    };
+
+    initializeAd();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
   // microCMS記事でも関連記事を表示（ローカル+CMS両方から抽出）
   const allArticles = [
