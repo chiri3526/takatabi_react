@@ -750,6 +750,7 @@ const ArticleContent = styled.div`
     margin: 1.6em auto;
     display: block;
     background: transparent;
+    cursor: zoom-in;
   }
 
   @media (max-width: 900px) {
@@ -794,6 +795,78 @@ const ArticleContent = styled.div`
       height: 14px;
     }
   }
+`;
+
+const ImageViewerOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.86);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  cursor: zoom-out;
+
+  @media (max-width: 600px) {
+    padding: 14px;
+    align-items: flex-start;
+  }
+`;
+
+const ImageViewerDialog = styled.div`
+  position: relative;
+  width: min(96vw, 1200px);
+  height: 92vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ImageViewerClose = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  font-size: 1.45rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.85);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 600px) {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+  }
+`;
+
+const ImageViewerImage = styled.img`
+  max-width: min(96vw, 1200px);
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  -webkit-user-drag: none;
 `;
 
 const AdContainer = styled.div`
@@ -909,6 +982,11 @@ const ArticlePage = (props) => {
   // アイキャッチ画像の縦横判定フックは必ず呼ぶ
   const [isVertical, setIsVertical] = React.useState(false);
   const [activeHeadingId, setActiveHeadingId] = React.useState('');
+  const [viewerOpen, setViewerOpen] = React.useState(false);
+  const [viewerSrc, setViewerSrc] = React.useState('');
+  const [viewerAlt, setViewerAlt] = React.useState('');
+  const [activeTriggerEl, setActiveTriggerEl] = React.useState(null);
+  const closeViewerButtonRef = useRef(null);
   // postはuseMemoで取得されるため、imageUrlは毎回計算
   const post = useMemo(() => {
     // まずローカル記事を探す
@@ -1172,6 +1250,70 @@ const ArticlePage = (props) => {
       if (observer) observer.disconnect();
     };
   }, [contentWithIds, cmsArticlesList]);
+
+  useEffect(() => {
+    if (!articleContentRef.current) return;
+    const container = articleContentRef.current;
+
+    const handleImageClick = (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const image = target.closest('img.cms-image');
+      if (!image || !container.contains(image)) return;
+
+      const src = image.getAttribute('src');
+      if (!src) return;
+
+      event.preventDefault();
+      if (!image.hasAttribute('tabindex')) {
+        image.setAttribute('tabindex', '-1');
+      }
+      setActiveTriggerEl(image);
+      setViewerSrc(src);
+      setViewerAlt(image.getAttribute('alt') || '');
+      setViewerOpen(true);
+    };
+
+    container.addEventListener('click', handleImageClick);
+    return () => {
+      container.removeEventListener('click', handleImageClick);
+    };
+  }, [contentWithIds]);
+
+  useEffect(() => {
+    if (!viewerOpen) {
+      if (activeTriggerEl && typeof activeTriggerEl.focus === 'function') {
+        try {
+          activeTriggerEl.focus({ preventScroll: true });
+        } catch (e) {
+          activeTriggerEl.focus();
+        }
+      }
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setViewerOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    window.requestAnimationFrame(() => {
+      if (closeViewerButtonRef.current) {
+        closeViewerButtonRef.current.focus();
+      }
+    });
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [viewerOpen, activeTriggerEl]);
 
   useEffect(() => {
     if (!toc.length || !articleContentRef.current) {
@@ -1461,6 +1603,29 @@ const ArticlePage = (props) => {
           </SidebarCard>
         </ArticleSidebar>
       </ArticleBodyGrid>
+      {viewerOpen && (
+        <ImageViewerOverlay
+          onClick={() => setViewerOpen(false)}
+          aria-hidden="true"
+        >
+          <ImageViewerDialog
+            role="dialog"
+            aria-modal="true"
+            aria-label="画像プレビュー"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <ImageViewerClose
+              ref={closeViewerButtonRef}
+              type="button"
+              onClick={() => setViewerOpen(false)}
+              aria-label="画像プレビューを閉じる"
+            >
+              ×
+            </ImageViewerClose>
+            <ImageViewerImage src={viewerSrc} alt={viewerAlt} />
+          </ImageViewerDialog>
+        </ImageViewerOverlay>
+      )}
     </ArticleContainer>
   );
 };
