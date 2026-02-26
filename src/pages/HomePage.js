@@ -13,6 +13,7 @@ import {
   FaGlobeAsia,
   FaMapMarkerAlt,
   FaPlay,
+  FaSearch,
   FaStar,
   FaTrain
 } from 'react-icons/fa';
@@ -536,6 +537,55 @@ const NewsletterForm = styled.div`
   }
 `;
 
+const SearchSection = styled(SectionBlock)`
+  scroll-margin-top: 90px;
+`;
+
+const SearchHead = styled.div`
+  margin-bottom: 14px;
+`;
+
+const SearchTitle = styled.h2`
+  margin: 0;
+  font-size: 1.5rem;
+  color: #121212;
+`;
+
+const SearchLead = styled.p`
+  margin: 6px 0 0;
+  color: ${theme.colors.text}bb;
+  font-size: 0.9rem;
+`;
+
+const SearchBox = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid ${theme.colors.primary}35;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.72rem 0.85rem;
+
+  svg {
+    color: ${theme.colors.primary};
+  }
+
+  input {
+    width: 100%;
+    border: none;
+    outline: none;
+    color: ${theme.colors.text};
+    font-size: 0.95rem;
+    background: transparent;
+  }
+`;
+
+const SearchMeta = styled.p`
+  margin: 10px 2px 0;
+  font-size: 0.82rem;
+  color: ${theme.colors.text}9a;
+`;
+
 function formatDate(iso) {
   if (!iso) return '';
   try {
@@ -561,7 +611,10 @@ const HomePage = () => {
   const [recommendedArticles, setRecommendedArticles] = useState([]);
   const [heroIndex, setHeroIndex] = useState(0);
   const [prevHeroImage, setPrevHeroImage] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const prevDisplayedHeroRef = useRef(null);
+  const searchSectionRef = useRef(null);
+  const searchInputRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -619,6 +672,32 @@ const HomePage = () => {
     const source = cmsArticles.length > 1 ? cmsArticles.slice(1) : recommendedArticles;
     return source.slice(0, 3);
   }, [cmsArticles, recommendedArticles]);
+
+  const searchedPosts = useMemo(() => {
+    const keyword = searchQuery.trim().toLowerCase();
+    if (!keyword) return [];
+    return cmsArticles.filter(post => {
+      const tags = Array.isArray(post.tags) ? post.tags : (post.tag ? [post.tag] : []);
+      const tagText = tags.map(tag => (typeof tag === 'object' ? tag.name || '' : String(tag))).join(' ');
+      const categoryText = typeof post.category === 'object' ? (post.category?.name || '') : (post.category || '');
+      const haystack = [
+        post.title,
+        post.excerpt,
+        post.content,
+        categoryText,
+        tagText
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(keyword);
+    });
+  }, [cmsArticles, searchQuery]);
+
+  const handleStartReading = () => {
+    searchSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.setTimeout(() => searchInputRef.current?.focus(), 250);
+  };
 
   const renderRecommendedArticles = () => {
     if (recommendedArticles.length === 0) return null;
@@ -708,13 +787,60 @@ const HomePage = () => {
             サステナブルな旅ガイド、ホテル情報、体験記まで。次の旅のヒントをここで見つけよう。
           </HeroLead>
           <HeroActions>
-            <HeroPrimary>Start Reading <FaArrowRight /></HeroPrimary>
+            <HeroPrimary onClick={handleStartReading}>Start Reading <FaArrowRight /></HeroPrimary>
             <HeroGhost><FaPlay /> Watch Video</HeroGhost>
           </HeroActions>
         </HeroInner>
       </HeroSection>
 
       <MainWrap>
+        <SearchSection ref={searchSectionRef}>
+          <SearchHead>
+            <SearchTitle>Article Search</SearchTitle>
+            <SearchLead>記事タイトル・本文・タグからキーワード検索できます。</SearchLead>
+          </SearchHead>
+          <SearchBox>
+            <FaSearch />
+            <input
+              ref={searchInputRef}
+              type="search"
+              placeholder="例: ラウンジ / 海外旅行 / ANA"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="記事検索"
+            />
+          </SearchBox>
+          <SearchMeta>
+            {searchQuery.trim()
+              ? `${searchedPosts.length} 件の記事が見つかりました`
+              : 'Start Reading を押すとこの検索欄にフォーカスします'}
+          </SearchMeta>
+          {searchQuery.trim() && (
+            <BlogGrid>
+              {searchedPosts.map(post => (
+                <Link
+                  to={`/?p=${post.slug || post.id}`}
+                  key={`search-${post.id || post.slug}`}
+                  style={{ textDecoration: 'none' }}
+                >
+                  <BlogCard>
+                    <BlogImage
+                      src={post.image?.url || post.image}
+                      alt={post.title}
+                      onError={(e) => { e.target.src = '/sample-images/no-image.jpg'; }}
+                    />
+                    <BlogContent>
+                      <DateText>{formatDate(post.publishedAt || post.createdAt || post.updatedAt)}</DateText>
+                      <BlogTitle>{post.title}</BlogTitle>
+                      {post.excerpt ? <BlogExcerpt>{post.excerpt}</BlogExcerpt> : null}
+                    </BlogContent>
+                  </BlogCard>
+                </Link>
+              ))}
+            </BlogGrid>
+          )}
+        </SearchSection>
+
         {renderRecommendedArticles()}
 
         {latestFeature && (
