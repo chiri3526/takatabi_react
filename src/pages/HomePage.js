@@ -813,7 +813,7 @@ const HomePage = () => {
           <SearchMeta>
             {searchQuery.trim()
               ? `${searchedPosts.length} 件の記事が見つかりました`
-              : 'Start Reading を押すとこの検索欄にフォーカスします'}
+              : ''}
           </SearchMeta>
           {searchQuery.trim() && (
             <BlogGrid>
