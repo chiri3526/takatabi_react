@@ -778,13 +778,13 @@ const HomePage = () => {
           <HeroPrevBackground key={prevHeroImage} $bgImage={prevHeroImage} $zIndex={1} />
         )}
         <HeroInner>
-          <HeroEyebrow>DISCOVER NATURE</HeroEyebrow>
+          <HeroEyebrow>DISCOVER WORLD</HeroEyebrow>
           <HeroTitle>
-            Explore the Wild <br />
-            <HeroHighlight>Unknown</HeroHighlight>
+            Travel Within <br />
+            <HeroHighlight>Reach</HeroHighlight>
           </HeroTitle>
           <HeroLead>
-            サステナブルな旅ガイド、ホテル情報、体験記まで。次の旅のヒントをここで見つけよう。
+            コスパよくサステナブルな旅、ラウンジ情報や一人旅体験記。あなたの旅立ちをもっと身近に。
           </HeroLead>
           <HeroActions>
             <HeroPrimary onClick={handleStartReading}>Start Reading <FaArrowRight /></HeroPrimary>
