@@ -807,6 +807,9 @@ const ImageViewerOverlay = styled.div`
   justify-content: center;
   padding: 24px;
   cursor: zoom-out;
+  opacity: ${props => (props.$visible ? 1 : 0)};
+  transition: opacity 280ms ease;
+  pointer-events: ${props => (props.$visible ? 'auto' : 'none')};
 
   @media (max-width: 600px) {
     padding: 14px;
@@ -821,40 +824,10 @@ const ImageViewerDialog = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-const ImageViewerClose = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1;
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.7);
-  color: #ffffff;
-  font-size: 1.45rem;
-  line-height: 1;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.85);
-  }
-
-  &:focus-visible {
-    outline: 2px solid #ffffff;
-    outline-offset: 2px;
-  }
-
-  @media (max-width: 600px) {
-    position: fixed;
-    top: 14px;
-    right: 14px;
-  }
+  opacity: ${props => (props.$visible ? 1 : 0)};
+  transform: ${props => (props.$visible ? 'scale(1)' : 'scale(0.985)')};
+  transition: opacity 280ms ease, transform 280ms ease;
+  pointer-events: none;
 `;
 
 const ImageViewerImage = styled.img`
@@ -867,6 +840,7 @@ const ImageViewerImage = styled.img`
   box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
   user-select: none;
   -webkit-user-drag: none;
+  pointer-events: auto;
 `;
 
 const AdContainer = styled.div`
@@ -983,10 +957,23 @@ const ArticlePage = (props) => {
   const [isVertical, setIsVertical] = React.useState(false);
   const [activeHeadingId, setActiveHeadingId] = React.useState('');
   const [viewerOpen, setViewerOpen] = React.useState(false);
+  const [viewerMounted, setViewerMounted] = React.useState(false);
+  const [viewerVisible, setViewerVisible] = React.useState(false);
   const [viewerSrc, setViewerSrc] = React.useState('');
   const [viewerAlt, setViewerAlt] = React.useState('');
   const [activeTriggerEl, setActiveTriggerEl] = React.useState(null);
-  const closeViewerButtonRef = useRef(null);
+  const viewerCloseTimeoutRef = useRef(null);
+  const viewerOpenRafRef = useRef(null);
+  const closeViewer = React.useCallback(() => {
+    setViewerVisible(false);
+    setViewerOpen(false);
+    if (viewerCloseTimeoutRef.current) {
+      clearTimeout(viewerCloseTimeoutRef.current);
+    }
+    viewerCloseTimeoutRef.current = window.setTimeout(() => {
+      setViewerMounted(false);
+    }, 280);
+  }, []);
   // postはuseMemoで取得されるため、imageUrlは毎回計算
   const post = useMemo(() => {
     // まずローカル記事を探す
@@ -1271,14 +1258,31 @@ const ArticlePage = (props) => {
       setActiveTriggerEl(image);
       setViewerSrc(src);
       setViewerAlt(image.getAttribute('alt') || '');
-      setViewerOpen(true);
+      if (viewerCloseTimeoutRef.current) {
+        clearTimeout(viewerCloseTimeoutRef.current);
+        viewerCloseTimeoutRef.current = null;
+      }
+      if (viewerOpenRafRef.current) {
+        cancelAnimationFrame(viewerOpenRafRef.current);
+        viewerOpenRafRef.current = null;
+      }
+      if (!viewerMounted) {
+        setViewerMounted(true);
+        setViewerVisible(false);
+      }
+      if (!viewerOpen) {
+        setViewerOpen(true);
+      }
+      viewerOpenRafRef.current = window.requestAnimationFrame(() => {
+        setViewerVisible(true);
+      });
     };
 
     container.addEventListener('click', handleImageClick);
     return () => {
       container.removeEventListener('click', handleImageClick);
     };
-  }, [contentWithIds]);
+  }, [contentWithIds, viewerMounted, viewerOpen]);
 
   useEffect(() => {
     if (!viewerOpen) {
@@ -1298,22 +1302,27 @@ const ArticlePage = (props) => {
     const onKeyDown = (event) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        setViewerOpen(false);
+        closeViewer();
       }
     };
     window.addEventListener('keydown', onKeyDown);
-
-    window.requestAnimationFrame(() => {
-      if (closeViewerButtonRef.current) {
-        closeViewerButtonRef.current.focus();
-      }
-    });
 
     return () => {
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [viewerOpen, activeTriggerEl]);
+  }, [viewerOpen, activeTriggerEl, closeViewer]);
+
+  useEffect(() => {
+    return () => {
+      if (viewerCloseTimeoutRef.current) {
+        clearTimeout(viewerCloseTimeoutRef.current);
+      }
+      if (viewerOpenRafRef.current) {
+        cancelAnimationFrame(viewerOpenRafRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!toc.length || !articleContentRef.current) {
@@ -1603,25 +1612,18 @@ const ArticlePage = (props) => {
           </SidebarCard>
         </ArticleSidebar>
       </ArticleBodyGrid>
-      {viewerOpen && (
+      {viewerMounted && (
         <ImageViewerOverlay
-          onClick={() => setViewerOpen(false)}
+          $visible={viewerVisible}
+          onClick={closeViewer}
           aria-hidden="true"
         >
           <ImageViewerDialog
             role="dialog"
             aria-modal="true"
             aria-label="画像プレビュー"
-            onClick={(event) => event.stopPropagation()}
+            $visible={viewerVisible}
           >
-            <ImageViewerClose
-              ref={closeViewerButtonRef}
-              type="button"
-              onClick={() => setViewerOpen(false)}
-              aria-label="画像プレビューを閉じる"
-            >
-              ×
-            </ImageViewerClose>
             <ImageViewerImage src={viewerSrc} alt={viewerAlt} />
           </ImageViewerDialog>
         </ImageViewerOverlay>
