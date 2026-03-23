@@ -5,6 +5,8 @@ import { theme } from '../styles/theme';
 import { FaLink, FaArrowLeft, FaSearch, FaTag, FaClock, FaGlobeAsia } from 'react-icons/fa';
 import { fetchArticleById, fetchArticles } from '../api/microcms';
 
+const X_WIDGET_SCRIPT_SRC = 'https://platform.twitter.com/widgets.js';
+
 // JSONファイルを一括取得（記事一覧を作るため）
 function importAllJson(r) {
   return r.keys().map(key => {
@@ -43,6 +45,102 @@ function useAdsenseScript() {
     }
     return undefined;
   }, []);
+}
+
+function getTweetStatusUrl(rawUrl) {
+  if (!rawUrl || typeof window === 'undefined') return null;
+
+  try {
+    const url = new URL(rawUrl, window.location.origin);
+    const host = url.hostname.replace(/^www\./, '').toLowerCase();
+    const supportedHosts = new Set(['x.com', 'twitter.com', 'mobile.twitter.com']);
+    if (!supportedHosts.has(host)) return null;
+
+    const match = url.pathname.match(/^\/([^/]+)\/status\/(\d+)/i);
+    if (!match) return null;
+
+    const [, screenName, statusId] = match;
+    return `https://twitter.com/${screenName}/status/${statusId}`;
+  } catch (e) {
+    return null;
+  }
+}
+
+function isStandaloneAnchor(anchor) {
+  const parent = anchor?.parentElement;
+  if (!parent) return false;
+  if (!['P', 'DIV', 'FIGURE'].includes(parent.tagName)) return false;
+
+  return Array.from(parent.childNodes).every(node => {
+    if (node === anchor) return true;
+    if (node.nodeType === Node.TEXT_NODE) return !node.textContent.trim();
+    return node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR';
+  });
+}
+
+function getTweetUrlFromText(text) {
+  if (!text) return null;
+  const trimmed = text.replace(/\u00a0/g, ' ').trim();
+  if (!trimmed) return null;
+
+  const match = trimmed.match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/[^\s/]+\/status\/\d+[^\s<]*/i);
+  if (!match) return null;
+  if (match[0] !== trimmed) return null;
+
+  return getTweetStatusUrl(match[0]);
+}
+
+function createTweetEmbedElements(doc, tweetUrl) {
+  const embedWrapper = doc.createElement('div');
+  embedWrapper.className = 'x-embed';
+  embedWrapper.setAttribute('data-x-embed', 'true');
+
+  const blockquote = doc.createElement('blockquote');
+  blockquote.className = 'twitter-tweet';
+  blockquote.setAttribute('data-conversation', 'none');
+  blockquote.setAttribute('data-dnt', 'true');
+
+  const link = doc.createElement('a');
+  link.href = tweetUrl;
+  link.textContent = tweetUrl;
+
+  blockquote.appendChild(link);
+  embedWrapper.appendChild(blockquote);
+
+  return embedWrapper;
+}
+
+function replaceTweetAnchors(doc) {
+  const anchors = Array.from(doc.querySelectorAll('a[href]'));
+
+  anchors.forEach(anchor => {
+    if (anchor.closest('blockquote.twitter-tweet')) return;
+
+    const href = anchor.getAttribute('href');
+    const tweetUrl = getTweetStatusUrl(href);
+    if (!tweetUrl) return;
+
+    const embedWrapper = createTweetEmbedElements(doc, tweetUrl);
+
+    if (isStandaloneAnchor(anchor)) {
+      anchor.parentElement.replaceWith(embedWrapper);
+    } else {
+      anchor.replaceWith(embedWrapper);
+    }
+  });
+}
+
+function replaceTweetTextBlocks(doc) {
+  const candidates = Array.from(doc.querySelectorAll('p, div, figure'));
+
+  candidates.forEach(node => {
+    if (node.querySelector('a, blockquote.twitter-tweet, [data-x-embed="true"]')) return;
+
+    const tweetUrl = getTweetUrlFromText(node.textContent || '');
+    if (!tweetUrl) return;
+
+    node.replaceWith(createTweetEmbedElements(doc, tweetUrl));
+  });
 }
 
 // 目次生成関数
@@ -88,9 +186,12 @@ function generateTocAndContent(html) {
     if (typeof window !== 'undefined' && typeof window.DOMParser !== 'undefined') {
       const parser = new DOMParser();
       const doc = parser.parseFromString(newHtml, 'text/html');
+      replaceTweetAnchors(doc);
+      replaceTweetTextBlocks(doc);
       const anchors = Array.from(doc.querySelectorAll('a'));
       anchors.forEach(a => {
         try {
+          if (a.closest('[data-x-embed="true"]')) return;
           const href = a.getAttribute('href');
           if (!href) return;
           const url = new URL(href, window.location.origin);
@@ -739,6 +840,23 @@ const ArticleContent = styled.div`
     pointer-events: none;
   }
 
+  .x-embed {
+    margin: 1.8rem 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .x-embed > div,
+  .x-embed .twitter-tweet,
+  .x-embed iframe {
+    max-width: 100% !important;
+  }
+
+  .x-embed .twitter-tweet {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
   img.cms-image,
   .cms-image {
     border-radius: 16px;
@@ -1014,6 +1132,38 @@ const ArticlePage = (props) => {
   const { toc, html: contentWithIds } = useMemo(() => generateTocAndContent(post?.content), [post]);
 
   useEffect(() => {
+    if (!articleContentRef.current) return;
+    const container = articleContentRef.current;
+    if (!container.querySelector('blockquote.twitter-tweet')) return;
+
+    const loadEmbeds = () => {
+      if (window.twttr?.widgets?.load) {
+        window.twttr.widgets.load(container);
+      }
+    };
+
+    const existingScript = document.querySelector(`script[src="${X_WIDGET_SCRIPT_SRC}"]`);
+    if (existingScript) {
+      if (window.twttr?.widgets?.load) {
+        loadEmbeds();
+      } else {
+        existingScript.addEventListener('load', loadEmbeds, { once: true });
+      }
+      return undefined;
+    }
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = X_WIDGET_SCRIPT_SRC;
+    script.addEventListener('load', loadEmbeds, { once: true });
+    document.body.appendChild(script);
+
+    return () => {
+      script.removeEventListener('load', loadEmbeds);
+    };
+  }, [contentWithIds]);
+
+  useEffect(() => {
     window.scrollTo(0, 0);
     // ローカル記事がなければmicroCMS APIで取得（未取得フラグをセット）
     const local = blogPosts.find(p => p.slug === id || p.id === id);
@@ -1049,6 +1199,7 @@ const ArticlePage = (props) => {
 
       anchors.forEach(a => {
         try {
+          if (a.closest('[data-x-embed="true"]') || a.closest('blockquote.twitter-tweet')) return;
           // 既に変換済みの内部リンクプレビューはスキップ
           if (a.classList && a.classList.contains('link-preview')) return;
           if (a.querySelector && a.querySelector('.link-preview')) return;
