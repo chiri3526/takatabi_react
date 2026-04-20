@@ -1,0 +1,202 @@
+---
+import { SITE_DESCRIPTION, SITE_NAME, absoluteUrl } from '../lib/site';
+
+type Props = {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  image?: string;
+};
+
+const {
+  title = SITE_NAME,
+  description = SITE_DESCRIPTION,
+  canonical = '/',
+  image
+} = Astro.props;
+
+const pageTitle = title === SITE_NAME ? SITE_NAME : `${title} | ${SITE_NAME}`;
+const canonicalUrl = absoluteUrl(canonical);
+const ogImage = image ? absoluteUrl(image) : undefined;
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="icon" href="/takatabi.favicon.jpg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
+  </head>
+  <body>
+    <slot />
+    <footer class="site-footer">&copy; 2026 takatabi All Rights Reserved.</footer>
+  </body>
+</html>
+
+<style is:global>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
+
+  :root {
+    --color-primary: #2e7d32;
+    --color-secondary: #4caf50;
+    --color-accent: #ff9800;
+    --color-bg: #f1f8e9;
+    --color-text: #212121;
+    --color-muted: #5d6f5f;
+    --color-line: rgba(46, 125, 50, 0.18);
+    --shadow-card: 0 10px 24px rgba(28, 78, 34, 0.11);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, #f4faf3 0%, #edf6ed 100%);
+    color: var(--color-text);
+    font-family: 'Noto Sans JP', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+  }
+
+  a {
+    color: var(--color-primary);
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 12px max(20px, calc((100vw - 1160px) / 2));
+    background: rgba(255, 255, 255, 0.94);
+    border-bottom: 1px solid var(--color-line);
+    backdrop-filter: blur(8px);
+  }
+
+  .brand {
+    color: var(--color-primary);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: none;
+    gap: 1.2rem;
+  }
+
+  .nav-links a {
+    color: var(--color-text);
+    font-size: 0.92rem;
+    text-decoration: none;
+  }
+
+  .nav-links a:hover,
+  .nav-links a[aria-current='page'] {
+    color: var(--color-primary);
+  }
+
+  .subscribe {
+    border: 0;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 700;
+    padding: 0.48rem 0.9rem;
+  }
+
+  .page-wrap {
+    width: min(1160px, 94vw);
+    margin: 0 auto;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 22px;
+  }
+
+  .post-card {
+    display: block;
+    height: 100%;
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--shadow-card);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .post-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    background: #e7efe7;
+  }
+
+  .post-card__body {
+    padding: 16px;
+  }
+
+  .post-card h2,
+  .post-card h3 {
+    margin: 0 0 8px;
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+
+  .post-card p {
+    margin: 0;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+  }
+
+  .meta {
+    color: var(--color-muted);
+    font-size: 0.82rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    margin-bottom: 8px;
+    border-radius: 999px;
+    background: rgba(46, 125, 50, 0.1);
+    color: var(--color-primary);
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 0.18rem 0.54rem;
+  }
+
+  .site-footer {
+    margin-top: 56px;
+    padding: 28px 20px;
+    background: var(--color-primary);
+    color: #fff;
+    text-align: center;
+  }
+
+  @media (min-width: 860px) {
+    .nav-links {
+      display: flex;
+    }
+  }
+</style>

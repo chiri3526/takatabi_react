@@ -2,9 +2,9 @@ import React from 'react';
 import { BrowserRouter as Router, useLocation } from 'react-router-dom';
 // import { HelmetProvider } from 'react-helmet-async';
 import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import ArticlePage from './pages/ArticlePage';
-import CategoryPage from './pages/CategoryPage';
+import HomePage from './react-pages/HomePage';
+import ArticlePage from './react-pages/ArticlePage';
+import CategoryPage from './react-pages/CategoryPage';
 import './App.css';
 
 function AppContent() {

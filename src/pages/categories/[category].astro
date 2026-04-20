@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getArticles } from '../../lib/microcms';
+import { CATEGORIES, categoryKeyForArticle, categoryPath } from '../../lib/site';
+
+export async function getStaticPaths() {
+  return CATEGORIES.map(category => ({
+    params: { category: category.key },
+    props: { category }
+  }));
+}
+
+const category = Astro.props.category || CATEGORIES.find(item => item.key === Astro.params.category);
+const articles = await getArticles();
+const posts = articles.filter(article => categoryKeyForArticle(article) === category?.key);
+---
+<BaseLayout
+  title={category?.label || 'Category'}
+  description={`${category?.label || 'Category'} articles from takatabi.`}
+  canonical={categoryPath(category?.key || '')}
+>
+  <header class="site-nav">
+    <a class="brand" href="/">takatabi</a>
+    <nav class="nav-links" aria-label="Main navigation">
+      {CATEGORIES.map(item => <a href={categoryPath(item.key)} aria-current={item.key === category?.key ? 'page' : undefined}>{item.label}</a>)}
+    </nav>
+    <button class="subscribe" type="button">Subscribe</button>
+  </header>
+
+  <main class="page-wrap category-page">
+    <header class="category-hero">
+      <p class="meta">Category</p>
+      <h1>{category?.label || 'Category'}</h1>
+    </header>
+
+    {posts.length > 0 ? (
+      <div class="card-grid">
+        {posts.map(article => <PostCard article={article} />)}
+      </div>
+    ) : (
+      <p>このカテゴリの記事はまだありません。</p>
+    )}
+  </main>
+</BaseLayout>
+
+<style>
+  .category-page {
+    padding-top: 34px;
+  }
+
+  .category-hero {
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .category-hero h1 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+</style>

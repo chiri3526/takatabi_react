@@ -1,0 +1,248 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { getArticles, getRecommendedArticles } from '../lib/microcms';
+import { CATEGORIES, SITE_DESCRIPTION, SITE_NAME, categoryKeyForArticle, categoryPath, imageUrl } from '../lib/site';
+
+const articles = await getArticles();
+const recommendedArticles = await getRecommendedArticles();
+const featured = articles[0] || recommendedArticles[0];
+const heroImages = [...recommendedArticles, ...articles]
+  .map(article => imageUrl(article.image))
+  .filter(Boolean)
+  .slice(0, 6);
+---
+<BaseLayout title={SITE_NAME} description={SITE_DESCRIPTION} canonical="/">
+  <script is:inline>
+    const params = new URLSearchParams(location.search);
+    const p = params.get('p');
+    const category = params.get('category');
+    if (p) location.replace(`/articles/${encodeURIComponent(p)}/`);
+    if (!p && category) location.replace(`/categories/${encodeURIComponent(category)}/`);
+  </script>
+
+  <header class="site-nav">
+    <a class="brand" href="/">takatabi</a>
+    <nav class="nav-links" aria-label="Main navigation">
+      {CATEGORIES.map(category => <a href={categoryPath(category.key)}>{category.label}</a>)}
+    </nav>
+    <button class="subscribe" type="button">Subscribe</button>
+  </header>
+
+  <section class="hero" data-hero-images={JSON.stringify(heroImages)}>
+    <div class="hero__bg" style={`background-image: linear-gradient(180deg, rgba(12, 34, 14, 0.36), rgba(12, 34, 14, 0.58)), url(${heroImages[0] || '/contents/photo/kyoto2.jpg'});`}></div>
+    <div class="hero__content">
+      <span class="hero__eyebrow">DISCOVER WORLD</span>
+      <h1>Travel Within <span>Reach</span></h1>
+      <p>旅、空港ラウンジ、移動のヒントを静的HTMLで軽く届ける takatabi の記事アーカイブです。</p>
+      <a href="#articles" class="hero__button">Start Reading</a>
+    </div>
+  </section>
+
+  <main class="page-wrap" id="articles">
+    <section class="search-band">
+      <label class="search-box">
+        <span>Search</span>
+        <input type="search" id="article-search" placeholder="keyword" />
+      </label>
+      <p class="meta" id="search-count"></p>
+    </section>
+
+    {featured && (
+      <section class="feature">
+        <a href={`/articles/${featured.slug || featured.id}/`}>
+          <img src={imageUrl(featured.image)} alt={featured.title || ''} />
+          <div>
+            <span class="badge">Latest</span>
+            <h2>{featured.title}</h2>
+            <p>{featured.excerpt}</p>
+          </div>
+        </a>
+      </section>
+    )}
+
+    {recommendedArticles.length > 0 && (
+      <section class="section">
+        <div class="section__head">
+          <h2>Featured Stories</h2>
+          <a href={categoryPath('overseas')}>View All</a>
+        </div>
+        <div class="card-grid">
+          {recommendedArticles.slice(0, 6).map(article => <PostCard article={article} heading="h3" />)}
+        </div>
+      </section>
+    )}
+
+    {CATEGORIES.map(category => {
+      const posts = articles.filter(article => categoryKeyForArticle(article) === category.key).slice(0, 3);
+      return posts.length ? (
+        <section class="section">
+          <div class="section__head">
+            <h2>{category.label}</h2>
+            <a href={categoryPath(category.key)}>View All</a>
+          </div>
+          <div class="card-grid" data-search-list>
+            {posts.map(article => <PostCard article={article} heading="h3" />)}
+          </div>
+        </section>
+      ) : null;
+    })}
+  </main>
+
+  <script>
+    const hero = document.querySelector('.hero');
+    const heroBg = document.querySelector('.hero__bg');
+    const images = JSON.parse(hero?.getAttribute('data-hero-images') || '[]');
+    let index = 0;
+    if (heroBg && images.length > 1) {
+      window.setInterval(() => {
+        index = (index + 1) % images.length;
+        heroBg.style.backgroundImage = `linear-gradient(180deg, rgba(12, 34, 14, 0.36), rgba(12, 34, 14, 0.58)), url(${images[index]})`;
+      }, 5000);
+    }
+
+    const search = document.getElementById('article-search');
+    const count = document.getElementById('search-count');
+    const cards = Array.from(document.querySelectorAll('.post-card'));
+    search?.addEventListener('input', () => {
+      const keyword = search.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(card => {
+        const matched = !keyword || card.textContent.toLowerCase().includes(keyword);
+        card.style.display = matched ? '' : 'none';
+        if (keyword && matched) visible += 1;
+      });
+      if (count) count.textContent = keyword ? `${visible}件の記事が見つかりました` : '';
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 520px;
+    overflow: hidden;
+    color: #fff;
+    text-align: center;
+  }
+
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    transition: background-image 0.8s ease;
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 1;
+    width: min(760px, 92vw);
+    padding: 48px 0;
+  }
+
+  .hero__eyebrow {
+    display: inline-flex;
+    border-radius: 999px;
+    background: #43d35f;
+    color: #09340f;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 0.32rem 0.72rem;
+  }
+
+  .hero h1 {
+    margin: 14px 0 0;
+    font-size: clamp(2.2rem, 6vw, 4.2rem);
+    line-height: 1.02;
+  }
+
+  .hero h1 span {
+    color: #48df69;
+  }
+
+  .hero p {
+    margin: 18px auto 0;
+    max-width: 620px;
+    font-size: 1rem;
+  }
+
+  .hero__button {
+    display: inline-flex;
+    margin-top: 26px;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: #fff;
+    font-weight: 700;
+    padding: 0.72rem 1.2rem;
+    text-decoration: none;
+  }
+
+  .search-band,
+  .section,
+  .feature {
+    margin-top: 34px;
+  }
+
+  .search-box {
+    display: grid;
+    gap: 8px;
+  }
+
+  .search-box input {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: #fff;
+    padding: 0.8rem 0.9rem;
+    font-size: 1rem;
+  }
+
+  .feature a {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: var(--shadow-card);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .feature img {
+    width: 100%;
+    height: 100%;
+    min-height: 320px;
+    object-fit: cover;
+  }
+
+  .feature div {
+    padding: 28px;
+  }
+
+  .section__head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .section__head h2 {
+    margin: 0;
+  }
+
+  @media (max-width: 760px) {
+    .hero {
+      min-height: 460px;
+    }
+
+    .feature a {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

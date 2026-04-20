@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="404" description="Page not found" canonical="/404/">
+  <header class="site-nav">
+    <a class="brand" href="/">takatabi</a>
+  </header>
+  <main class="not-found">
+    <h1>404</h1>
+    <p>ページが見つかりませんでした。</p>
+    <a href="/">トップページへ戻る</a>
+  </main>
+</BaseLayout>
+
+<style>
+  .not-found {
+    width: min(720px, 92vw);
+    min-height: 50vh;
+    margin: 56px auto;
+    text-align: center;
+  }
+</style>

@@ -1,10 +1,25 @@
 [[redirects]]
+  from = "/admin"
+  to = "/admin/index.html"
+  status = 200
+
+[[redirects]]
   from = "/admin/*"
   to = "/admin/:splat"
   status = 200
 
 [[redirects]]
+  from = "/articles/*"
+  to = "/404/"
+  status = 404
+
+[[redirects]]
+  from = "/categories/*"
+  to = "/404/"
+  status = 404
+
+[[redirects]]
   from = "/*"
-  to = "/index.html"
-  status = 200
+  to = "/404/"
+  status = 404
 
