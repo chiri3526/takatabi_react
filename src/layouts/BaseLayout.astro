@@ -157,6 +157,13 @@ const ogImage = image ? absoluteUrl(image) : undefined;
     padding: 16px;
   }
 
+  .post-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
   .post-card h2,
   .post-card h3 {
     margin: 0 0 8px;
@@ -177,7 +184,6 @@ const ogImage = image ? absoluteUrl(image) : undefined;
 
   .badge {
     display: inline-flex;
-    margin-bottom: 8px;
     border-radius: 999px;
     background: rgba(46, 125, 50, 0.1);
     color: var(--color-primary);

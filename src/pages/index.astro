@@ -2,11 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import { getArticles, getRecommendedArticles } from '../lib/microcms';
-import { CATEGORIES, SITE_DESCRIPTION, SITE_NAME, categoryKeyForArticle, categoryPath, imageUrl } from '../lib/site';
+import { CATEGORIES, SITE_DESCRIPTION, SITE_NAME, categoryKeyForArticle, categoryPath, formatDate, imageUrl, tagLabels } from '../lib/site';
 
 const articles = await getArticles();
 const recommendedArticles = await getRecommendedArticles();
 const featured = articles[0] || recommendedArticles[0];
+const featuredDate = featured ? formatDate(featured.publishedAt || featured.createdAt || featured.updatedAt) : '';
+const featuredTags = featured ? tagLabels(featured) : [];
 const heroImages = [...recommendedArticles, ...articles]
   .map(article => imageUrl(article.image))
   .filter(Boolean)
@@ -53,9 +55,13 @@ const heroImages = [...recommendedArticles, ...articles]
         <a href={`/articles/${featured.slug || featured.id}/`}>
           <img src={imageUrl(featured.image)} alt={featured.title || ''} />
           <div>
-            <span class="badge">Latest</span>
+            {featuredTags.length > 0 && (
+              <div class="post-card__tags" aria-label="Tags">
+                {featuredTags.map(tag => <span class="badge">{tag}</span>)}
+              </div>
+            )}
+            {featuredDate && <div class="meta">{featuredDate}</div>}
             <h2>{featured.title}</h2>
-            <p>{featured.excerpt}</p>
           </div>
         </a>
       </section>
@@ -68,7 +74,7 @@ const heroImages = [...recommendedArticles, ...articles]
           <a href={categoryPath('overseas')}>View All</a>
         </div>
         <div class="card-grid">
-          {recommendedArticles.slice(0, 6).map(article => <PostCard article={article} heading="h3" />)}
+          {recommendedArticles.slice(0, 6).map(article => <PostCard article={article} heading="h3" showExcerpt={false} />)}
         </div>
       </section>
     )}
@@ -82,7 +88,7 @@ const heroImages = [...recommendedArticles, ...articles]
             <a href={categoryPath(category.key)}>View All</a>
           </div>
           <div class="card-grid" data-search-list>
-            {posts.map(article => <PostCard article={article} heading="h3" />)}
+            {posts.map(article => <PostCard article={article} heading="h3" showExcerpt={false} />)}
           </div>
         </section>
       ) : null;

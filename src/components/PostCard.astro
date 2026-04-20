@@ -5,9 +5,10 @@ import { articlePath, excerptFromArticle, formatDate, imageUrl, tagLabels } from
 type Props = {
   article: Article;
   heading?: 'h2' | 'h3';
+  showExcerpt?: boolean;
 };
 
-const { article, heading = 'h2' } = Astro.props;
+const { article, heading = 'h2', showExcerpt = true } = Astro.props;
 const Heading = heading;
 const date = formatDate(article.publishedAt || article.createdAt || article.updatedAt);
 const tags = tagLabels(article);
@@ -15,9 +16,13 @@ const tags = tagLabels(article);
 <a class="post-card" href={articlePath(article)}>
   <img src={imageUrl(article.image)} alt={article.title || ''} loading="lazy" />
   <div class="post-card__body">
-    {tags[0] && <span class="badge">{tags[0]}</span>}
+    {tags.length > 0 && (
+      <div class="post-card__tags" aria-label="Tags">
+        {tags.map(tag => <span class="badge">{tag}</span>)}
+      </div>
+    )}
     {date && <div class="meta">{date}</div>}
     <Heading>{article.title || 'Untitled'}</Heading>
-    <p>{excerptFromArticle(article)}</p>
+    {showExcerpt && <p>{excerptFromArticle(article)}</p>}
   </div>
 </a>
