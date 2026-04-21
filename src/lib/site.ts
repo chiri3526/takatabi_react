@@ -3,10 +3,10 @@ export const SITE_DESCRIPTION = 'Travel guides, lounge reviews, and trip ideas f
 export const SITE_URL = 'https://takatabi.net';
 
 export const CATEGORIES = [
-  { key: 'domestic', label: 'Domestic Travel', cmsNames: ['domestic', '国内旅行'] },
-  { key: 'overseas', label: 'Overseas Travel', cmsNames: ['overseas', '海外旅行'] },
-  { key: 'lounge', label: 'Airport Lounges', cmsNames: ['lounge', 'ラウンジ'] },
-  { key: 'train', label: 'Train Travel', cmsNames: ['train', '鉄道'] }
+  { key: 'domestic', label: '国内旅行', cmsNames: ['domestic', '国内旅行', 'Domestic Travel'] },
+  { key: 'overseas', label: '海外旅行', cmsNames: ['overseas', '海外旅行', 'Overseas Travel'] },
+  { key: 'lounge', label: 'ラウンジ', cmsNames: ['lounge', 'ラウンジ', 'Airport Lounges'] },
+  { key: 'train', label: '鉄道', cmsNames: ['train', '鉄道', 'Train Travel'] }
 ];
 
 export function absoluteUrl(path = '/') {

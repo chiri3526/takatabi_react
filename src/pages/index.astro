@@ -2,17 +2,23 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import { getArticles, getRecommendedArticles } from '../lib/microcms';
-import { CATEGORIES, SITE_DESCRIPTION, SITE_NAME, categoryKeyForArticle, categoryPath, formatDate, imageUrl, tagLabels } from '../lib/site';
+import { CATEGORIES, SITE_DESCRIPTION, SITE_NAME, articlePath, categoryKeyForArticle, categoryPath, formatDate, imageUrl, tagLabels } from '../lib/site';
 
 const articles = await getArticles();
 const recommendedArticles = await getRecommendedArticles();
-const featured = articles[0] || recommendedArticles[0];
-const featuredDate = featured ? formatDate(featured.publishedAt || featured.createdAt || featured.updatedAt) : '';
-const featuredTags = featured ? tagLabels(featured) : [];
+const latestArticle = articles[0] || recommendedArticles[0];
+const latestTags = latestArticle ? tagLabels(latestArticle) : [];
+const trendingArticles = (articles.length > 1 ? articles.slice(1) : recommendedArticles).slice(0, 3);
 const heroImages = [...recommendedArticles, ...articles]
   .map(article => imageUrl(article.image))
   .filter(Boolean)
   .slice(0, 6);
+const categoryDisplay = {
+  domestic: { label: '国内旅行', icon: 'pin' },
+  overseas: { label: '海外旅行', icon: 'globe' },
+  lounge: { label: 'ラウンジ', icon: 'lounge' },
+  train: { label: '鉄道', icon: 'train' }
+};
 ---
 <BaseLayout title={SITE_NAME} description={SITE_DESCRIPTION} canonical="/">
   <script is:inline>
@@ -50,48 +56,82 @@ const heroImages = [...recommendedArticles, ...articles]
       <p class="meta" id="search-count"></p>
     </section>
 
-    {featured && (
-      <section class="feature">
-        <a href={`/articles/${featured.slug || featured.id}/`}>
-          <img src={imageUrl(featured.image)} alt={featured.title || ''} />
+    {recommendedArticles.length > 0 && (
+      <section class="section section--framed">
+        <div class="section__head">
           <div>
-            {featuredTags.length > 0 && (
-              <div class="post-card__tags" aria-label="Tags">
-                {featuredTags.map(tag => <span class="badge">{tag}</span>)}
-              </div>
-            )}
-            {featuredDate && <div class="meta">{featuredDate}</div>}
-            <h2>{featured.title}</h2>
+            <h2>Featured Stories</h2>
+            <p>編集部おすすめの人気記事をピックアップ</p>
           </div>
-        </a>
+          <a class="view-all" href={categoryPath('overseas')}>View All Posts <span aria-hidden="true">›</span></a>
+        </div>
+        <div class="card-grid card-grid--featured">
+          {recommendedArticles.slice(0, 3).map(article => (
+            <a class="post-card post-card--featured" href={articlePath(article)}>
+              <img src={imageUrl(article.image)} alt={article.title || ''} loading="lazy" />
+              <div class="post-card__body">
+                <div class="post-card__tags" aria-label="Tags">
+                  <span class="badge badge--recommend">★ おすすめ</span>
+                  {tagLabels(article).map(tag => <span class="badge">{tag}</span>)}
+                </div>
+                <div class="meta">{formatDate(article.publishedAt || article.createdAt || article.updatedAt)}</div>
+                <h3>{article.title || 'Untitled'}</h3>
+              </div>
+            </a>
+          ))}
+        </div>
       </section>
     )}
 
-    {recommendedArticles.length > 0 && (
-      <section class="section">
-        <div class="section__head">
-          <h2>Featured Stories</h2>
-          <a href={categoryPath('overseas')}>View All</a>
-        </div>
-        <div class="card-grid">
-          {recommendedArticles.slice(0, 6).map(article => <PostCard article={article} heading="h3" showExcerpt={false} />)}
-        </div>
+    {latestArticle && (
+      <section class="latest-layout">
+        <a class="latest-card" href={articlePath(latestArticle)}>
+          <img src={imageUrl(latestArticle.image)} alt={latestArticle.title || ''} />
+          <div class="latest-card__overlay">
+            <div class="latest-card__rule"><span>{latestTags[0] || 'ROAD TRIP'}</span></div>
+            <h2>{latestArticle.title}</h2>
+            <p>新着記事のハイライトをご覧ください。</p>
+            <strong>Read Article</strong>
+          </div>
+        </a>
+
+        {trendingArticles.length > 0 && (
+          <aside class="trending-panel">
+            <h2><span aria-hidden="true">★</span> Trending Now</h2>
+            <div class="trending-list">
+              {trendingArticles.map(article => (
+                <a class="trending-item" href={articlePath(article)}>
+                  <img src={imageUrl(article.image)} alt={article.title || ''} loading="lazy" />
+                  <div>
+                    <p>{categoryDisplay[categoryKeyForArticle(article)]?.label || categoryKeyForArticle(article) || 'guide'}</p>
+                    <h3>{article.title || 'Untitled'}</h3>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </aside>
+        )}
       </section>
     )}
 
     {CATEGORIES.map(category => {
       const posts = articles.filter(article => categoryKeyForArticle(article) === category.key).slice(0, 3);
-      return posts.length ? (
-        <section class="section">
-          <div class="section__head">
-            <h2>{category.label}</h2>
-            <a href={categoryPath(category.key)}>View All</a>
+      const display = categoryDisplay[category.key] || { label: category.label, icon: 'pin' };
+      return (
+        <section class="category-section">
+          <div class="category-heading">
+            <span class={`category-icon category-icon--${display.icon}`} aria-hidden="true"></span>
+            <h2>{display.label}</h2>
           </div>
-          <div class="card-grid" data-search-list>
-            {posts.map(article => <PostCard article={article} heading="h3" showExcerpt={false} />)}
-          </div>
+          {posts.length > 0 ? (
+            <div class="card-grid" data-search-list>
+              {posts.map(article => <PostCard article={article} heading="h3" showExcerpt={false} />)}
+            </div>
+          ) : (
+            <p class="category-empty">このカテゴリの記事はまだありません。</p>
+          )}
         </section>
-      ) : null;
+      );
     })}
   </main>
 
@@ -189,7 +229,8 @@ const heroImages = [...recommendedArticles, ...articles]
 
   .search-band,
   .section,
-  .feature {
+  .latest-layout,
+  .category-section {
     margin-top: 34px;
   }
 
@@ -207,27 +248,11 @@ const heroImages = [...recommendedArticles, ...articles]
     font-size: 1rem;
   }
 
-  .feature a {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 0;
-    overflow: hidden;
-    border-radius: 8px;
-    background: #fff;
-    box-shadow: var(--shadow-card);
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .feature img {
-    width: 100%;
-    height: 100%;
-    min-height: 320px;
-    object-fit: cover;
-  }
-
-  .feature div {
-    padding: 28px;
+  .section--framed {
+    border: 1px solid var(--color-line);
+    border-radius: 16px;
+    background: rgba(247, 250, 247, 0.82);
+    padding: 24px 22px 34px;
   }
 
   .section__head {
@@ -235,11 +260,267 @@ const heroImages = [...recommendedArticles, ...articles]
     align-items: end;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 28px;
   }
 
   .section__head h2 {
     margin: 0;
+    color: #151515;
+    font-size: clamp(1.85rem, 3vw, 2rem);
+    line-height: 1.1;
+  }
+
+  .section__head p {
+    margin: 6px 0 0;
+    color: #5d6f5f;
+    font-size: 0.92rem;
+  }
+
+  .view-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-primary);
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .card-grid--featured {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .post-card--featured img {
+    height: 200px;
+    aspect-ratio: auto;
+  }
+
+  .post-card--featured .post-card__body {
+    padding: 20px 16px 22px;
+  }
+
+  .badge--recommend {
+    background: #ffe83a;
+    color: #5f5700;
+  }
+
+  .latest-layout {
+    display: grid;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 18px;
+    align-items: stretch;
+  }
+
+  .latest-card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    min-height: 340px;
+    border-radius: 14px;
+    background: #16351a;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .latest-card img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .latest-card__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 24px 18px 20px;
+    background: linear-gradient(180deg, rgba(8, 20, 8, 0.05), rgba(8, 20, 8, 0.72));
+  }
+
+  .latest-card__rule {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 20px;
+    margin-bottom: 10px;
+    border-radius: 999px;
+    background: #39df59;
+  }
+
+  .latest-card__rule span {
+    padding: 0 10px;
+    color: #062d0b;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .latest-card h2 {
+    margin: 0;
+    max-width: 680px;
+    color: #fff;
+    font-size: clamp(1.45rem, 2.5vw, 2rem);
+    line-height: 1.24;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  }
+
+  .latest-card p {
+    margin: 10px 0 0;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 0.95rem;
+  }
+
+  .latest-card strong {
+    display: inline-flex;
+    width: fit-content;
+    margin-top: 14px;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: #fff;
+    font-size: 0.88rem;
+    padding: 0.5rem 0.95rem;
+  }
+
+  .trending-panel {
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+    background: rgba(247, 250, 247, 0.9);
+    padding: 16px;
+  }
+
+  .trending-panel h2 {
+    margin: 0;
+    color: #151515;
+    font-size: 1.18rem;
+    line-height: 1.2;
+  }
+
+  .trending-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .trending-item {
+    display: grid;
+    grid-template-columns: 66px minmax(0, 1fr);
+    gap: 10px;
+    align-items: start;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .trending-item img {
+    width: 66px;
+    height: 66px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .trending-item p {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .trending-item h3 {
+    margin: 2px 0 0;
+    color: #1d1d1d;
+    font-size: 0.9rem;
+    line-height: 1.38;
+  }
+
+  .category-section {
+    margin-bottom: 32px;
+  }
+
+  .category-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 30px;
+  }
+
+  .category-heading h2 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: 1.45rem;
+    line-height: 1.2;
+  }
+
+  .category-empty {
+    margin: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.72);
+    color: var(--color-muted);
+    padding: 18px;
+    text-align: center;
+  }
+
+  .category-icon {
+    position: relative;
+    display: block;
+    width: 28px;
+    height: 40px;
+  }
+
+  .category-icon--pin::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 0;
+    width: 28px;
+    height: 28px;
+    background: var(--color-primary);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+  }
+
+  .category-icon--pin::after {
+    content: '';
+    position: absolute;
+    top: 9px;
+    left: 9px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f4faf3;
+  }
+
+  .category-icon--globe,
+  .category-icon--lounge,
+  .category-icon--train {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--color-primary);
+    border-radius: 50%;
+  }
+
+  .category-icon--lounge {
+    border-radius: 10px;
+  }
+
+  .category-icon--train {
+    border-radius: 8px;
+  }
+
+  .category-icon--train::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 7px;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--color-primary);
   }
 
   @media (max-width: 760px) {
@@ -247,8 +528,18 @@ const heroImages = [...recommendedArticles, ...articles]
       min-height: 460px;
     }
 
-    .feature a {
+    .section__head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .card-grid--featured,
+    .latest-layout {
       grid-template-columns: 1fr;
+    }
+
+    .latest-card {
+      min-height: 360px;
     }
   }
 </style>
