@@ -98,12 +98,31 @@ const canonical = articlePath(article);
 
   <script is:inline src="https://platform.twitter.com/widgets.js" async></script>
   <script>
+    function safeViewerImageUrl(value) {
+      if (!value) return null;
+      try {
+        const url = new URL(value, window.location.origin);
+        const allowedLocalPath = url.origin === window.location.origin && url.pathname.startsWith('/contents/');
+        const allowedMicrocmsCdn = url.hostname === 'images.microcms-assets.io' || url.hostname.endsWith('.microcms-assets.io');
+        return allowedLocalPath || allowedMicrocmsCdn ? url.href : null;
+      } catch {
+        return null;
+      }
+    }
+
     document.querySelectorAll('.article-content img.cms-image').forEach(image => {
       image.addEventListener('click', () => {
+        const src = safeViewerImageUrl(image.getAttribute('src'));
+        if (!src) return;
+
         const overlay = document.createElement('button');
+        const viewerImage = document.createElement('img');
+
         overlay.className = 'image-viewer';
         overlay.type = 'button';
-        overlay.innerHTML = `<img src="${image.getAttribute('src')}" alt="${image.getAttribute('alt') || ''}">`;
+        viewerImage.setAttribute('src', src);
+        viewerImage.setAttribute('alt', image.getAttribute('alt') || '');
+        overlay.appendChild(viewerImage);
         overlay.addEventListener('click', () => overlay.remove());
         document.body.appendChild(overlay);
       });

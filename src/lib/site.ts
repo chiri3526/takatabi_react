@@ -1,3 +1,5 @@
+import { sanitizeArticleHtml } from './sanitize';
+
 export const SITE_NAME = 'takatabi';
 export const SITE_DESCRIPTION = 'Travel guides, lounge reviews, and trip ideas from takatabi.';
 export const SITE_URL = 'https://takatabi.net';
@@ -68,7 +70,7 @@ export function withToc(content = '') {
     toc.push({ tag, id, text: cleanText });
     return `<${tag} id="${id}"${attrs}>${text}</${tag}>`;
   });
-  return { toc, html };
+  return { toc, html: sanitizeArticleHtml(html) };
 }
 
 export function excerptFromArticle(article: { excerpt?: string; content?: string }, fallback = SITE_DESCRIPTION) {
