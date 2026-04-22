@@ -1,0 +1,265 @@
+---
+import { CATEGORIES, categoryPath } from '../lib/site';
+
+const currentPath = Astro.url.pathname;
+
+const categoryIcons = {
+  domestic: { type: 'pin' },
+  overseas: { type: 'image', src: '/category-icons/flight.png' },
+  lounge: { type: 'image', src: '/category-icons/chair.png' },
+  train: { type: 'image', src: '/category-icons/train.png' }
+};
+
+const informationItems = [
+  { label: 'Home', href: '/', icon: 'H' },
+  { label: 'About Us', href: '/about', icon: 'i' },
+  { label: 'Contact', href: '/contact', icon: '@' }
+];
+---
+
+<button class="sidebar-toggle" type="button" aria-label="メニューを開く" aria-expanded="false" data-sidebar-toggle>
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<aside class="site-sidebar" aria-label="Site menu" data-sidebar>
+  <nav>
+    <ul class="sidebar-list">
+      {CATEGORIES.map(category => {
+        const icon = categoryIcons[category.key] || { type: 'pin' };
+        const href = categoryPath(category.key);
+        const active = currentPath === href;
+        return (
+          <li class="sidebar-item">
+            <a href={href} aria-current={active ? 'page' : undefined}>
+              <span
+                class:list={['sidebar-icon', icon.type === 'image' ? 'sidebar-icon--image' : 'sidebar-icon--pin']}
+                style={icon.type === 'image' ? `--icon-url: url('${icon.src}')` : undefined}
+                aria-hidden="true"
+              ></span>
+              <span>{category.label}</span>
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+
+    <section class="sidebar-information" aria-labelledby="sidebar-information-title">
+      <h2 id="sidebar-information-title">Information</h2>
+      <ul class="sidebar-list">
+        {informationItems.map(item => (
+          <li class="sidebar-item">
+            <a href={item.href} aria-current={currentPath === item.href ? 'page' : undefined}>
+              <span class="sidebar-icon sidebar-icon--text" aria-hidden="true">{item.icon}</span>
+              <span>{item.label}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </nav>
+</aside>
+
+<button class="sidebar-backdrop" type="button" aria-label="メニューを閉じる" data-sidebar-backdrop></button>
+
+<script>
+  const toggle = document.querySelector('[data-sidebar-toggle]');
+  const sidebar = document.querySelector('[data-sidebar]');
+  const backdrop = document.querySelector('[data-sidebar-backdrop]');
+
+  function setSidebarOpen(open) {
+    document.documentElement.classList.toggle('sidebar-open', open);
+    toggle?.setAttribute('aria-expanded', String(open));
+    toggle?.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
+  }
+
+  toggle?.addEventListener('click', () => {
+    setSidebarOpen(!document.documentElement.classList.contains('sidebar-open'));
+  });
+
+  backdrop?.addEventListener('click', () => setSidebarOpen(false));
+
+  sidebar?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => setSidebarOpen(false));
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') setSidebarOpen(false);
+  });
+</script>
+
+<style>
+  .sidebar-toggle {
+    position: fixed;
+    top: 60px;
+    left: 20px;
+    z-index: 1001;
+    display: flex;
+    width: 30px;
+    height: 25px;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .sidebar-toggle span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background: #111;
+    transition: opacity 0.24s ease, transform 0.24s ease, background 0.24s ease;
+  }
+
+  .sidebar-toggle:hover span,
+  :global(.sidebar-open) .sidebar-toggle span {
+    background: var(--color-accent);
+  }
+
+  :global(.sidebar-open) .sidebar-toggle span:nth-child(1) {
+    transform: translateY(11px) rotate(45deg);
+  }
+
+  :global(.sidebar-open) .sidebar-toggle span:nth-child(2) {
+    opacity: 0;
+  }
+
+  :global(.sidebar-open) .sidebar-toggle span:nth-child(3) {
+    transform: translateY(-11px) rotate(-45deg);
+  }
+
+  .site-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 250px;
+    height: 100vh;
+    overflow-y: auto;
+    background: #fff;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+    padding-top: 100px;
+    transform: translateX(-100%);
+    transition: transform 0.28s ease;
+  }
+
+  :global(.sidebar-open) .site-sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: none;
+    border: 0;
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+  }
+
+  :global(.sidebar-open) .sidebar-backdrop {
+    display: block;
+  }
+
+  .sidebar-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sidebar-item {
+    border-bottom: 1px solid var(--color-bg);
+  }
+
+  .sidebar-item a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 58px;
+    color: var(--color-text);
+    padding: 14px 18px;
+    text-decoration: none;
+  }
+
+  .sidebar-item a:hover,
+  .sidebar-item a[aria-current='page'] {
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  .sidebar-icon {
+    position: relative;
+    display: inline-flex;
+    width: 22px;
+    min-width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  .sidebar-icon--image {
+    background: var(--color-primary);
+    mask: var(--icon-url) center / 22px 22px no-repeat;
+    -webkit-mask: var(--icon-url) center / 22px 22px no-repeat;
+  }
+
+  .sidebar-icon--pin::before {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: var(--color-primary);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+  }
+
+  .sidebar-icon--pin::after {
+    content: '';
+    position: absolute;
+    top: 7px;
+    left: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+  }
+
+  .sidebar-icon--text {
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+
+  .sidebar-information {
+    margin-top: 28px;
+    padding: 0 0 32px;
+  }
+
+  .sidebar-information h2 {
+    margin: 0 18px 10px;
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 480px) {
+    .sidebar-toggle {
+      top: 52px;
+      left: 16px;
+    }
+
+    .site-sidebar {
+      width: min(250px, 82vw);
+      padding-top: 84px;
+    }
+  }
+</style>
