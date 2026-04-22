@@ -73,7 +73,7 @@ const searchArticlesJson = JSON.stringify(searchArticles).replace(/</g, '\\u003c
         <span data-typewriter-line data-text="コスパよくサステナブルな旅、ラウンジ情報や一人旅体験記。">コスパよくサステナブルな旅、ラウンジ情報や一人旅体験記。</span><br />
         <span data-typewriter-line data-text="あなたの旅立ちをもっと身近に。">あなたの旅立ちをもっと身近に。</span><span class="typewriter-caret" aria-hidden="true"></span>
       </p>
-      <a href="#articles" class="hero__button">Start Reading</a>
+      <a href="#recommended-articles" class="hero__button" data-smooth-scroll>Start Reading</a>
     </div>
   </section>
 
@@ -91,7 +91,7 @@ const searchArticlesJson = JSON.stringify(searchArticles).replace(/</g, '\\u003c
     </section>
 
     {recommendedArticles.length > 0 && (
-      <section class="section section--framed">
+      <section class="section section--framed" id="recommended-articles">
         <div class="section__head">
           <div>
             <h2>Featured Stories</h2>
@@ -227,6 +227,43 @@ const searchArticlesJson = JSON.stringify(searchArticles).replace(/</g, '\\u003c
     const typedLead = document.querySelector('.hero__lead--typed');
     const typedLines = Array.from(document.querySelectorAll('[data-typewriter-line]'));
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const startReading = document.querySelector('[data-smooth-scroll]');
+
+    startReading?.addEventListener('click', event => {
+      const targetId = startReading.getAttribute('href')?.slice(1);
+      const target = targetId ? document.getElementById(targetId) : null;
+      if (!target) return;
+
+      event.preventDefault();
+
+      if (prefersReducedMotion) {
+        target.scrollIntoView();
+        history.pushState(null, '', `#${targetId}`);
+        return;
+      }
+
+      const startY = window.scrollY;
+      const targetY = target.getBoundingClientRect().top + startY;
+      const distance = targetY - startY;
+      const duration = 950;
+      const startedAt = performance.now();
+      const easeInOutCubic = progress =>
+        progress < 0.5 ? 4 * progress ** 3 : 1 - ((-2 * progress + 2) ** 3) / 2;
+
+      const scrollFrame = currentTime => {
+        const elapsed = currentTime - startedAt;
+        const progress = Math.min(elapsed / duration, 1);
+        window.scrollTo(0, startY + distance * easeInOutCubic(progress));
+
+        if (progress < 1) {
+          requestAnimationFrame(scrollFrame);
+        } else {
+          history.pushState(null, '', `#${targetId}`);
+        }
+      };
+
+      requestAnimationFrame(scrollFrame);
+    });
 
     if (typedLead && typedLines.length && !prefersReducedMotion) {
       typedLead.classList.add('is-typing');
