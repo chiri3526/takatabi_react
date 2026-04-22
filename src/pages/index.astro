@@ -123,6 +123,7 @@ const categoryDisplay = {
           <div class="category-heading">
             <span class={iconClass} style={display.iconSrc ? `--icon-url: url('${display.iconSrc}')` : undefined} aria-hidden="true"></span>
             <h2>{display.label}</h2>
+            <a class="view-all" href={categoryPath(category.key)}>さらに表示 <span aria-hidden="true">›</span></a>
           </div>
           {posts.length > 0 ? (
             <div class="card-grid" data-search-list>
