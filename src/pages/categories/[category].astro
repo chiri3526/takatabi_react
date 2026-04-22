@@ -36,7 +36,7 @@ const posts = articles.filter(article => categoryKeyForArticle(article) === cate
 
     {posts.length > 0 ? (
       <div class="card-grid">
-        {posts.map(article => <PostCard article={article} />)}
+        {posts.map(article => <PostCard article={article} showExcerpt={false} />)}
       </div>
     ) : (
       <p>このカテゴリの記事はまだありません。</p>
