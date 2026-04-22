@@ -117,14 +117,20 @@ const canonical = articlePath(article);
 
         const overlay = document.createElement('button');
         const viewerImage = document.createElement('img');
+        const closeViewer = () => {
+          overlay.classList.remove('is-open');
+          overlay.classList.add('is-closing');
+          overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+        };
 
         overlay.className = 'image-viewer';
         overlay.type = 'button';
         viewerImage.setAttribute('src', src);
         viewerImage.setAttribute('alt', image.getAttribute('alt') || '');
         overlay.appendChild(viewerImage);
-        overlay.addEventListener('click', () => overlay.remove());
+        overlay.addEventListener('click', closeViewer);
         document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('is-open'));
       });
     });
   </script>
@@ -302,12 +308,28 @@ const canonical = articlePath(article);
     background: rgba(0, 0, 0, 0.82);
     padding: 24px;
     cursor: zoom-out;
+    opacity: 0;
+    transition: opacity 0.38s ease;
+  }
+
+  :global(.image-viewer.is-open) {
+    opacity: 1;
+  }
+
+  :global(.image-viewer.is-closing) {
+    opacity: 0;
   }
 
   :global(.image-viewer img) {
     max-width: min(1100px, 94vw);
     max-height: 90vh;
     object-fit: contain;
+    transform: scale(0.985);
+    transition: transform 0.38s ease;
+  }
+
+  :global(.image-viewer.is-open img) {
+    transform: scale(1);
   }
 
   @media (max-width: 900px) {
