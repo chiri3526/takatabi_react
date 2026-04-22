@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import { getArticles, getRecommendedArticles } from '../lib/microcms';
-import { CATEGORIES, SITE_DESCRIPTION, SITE_NAME, articlePath, categoryKeyForArticle, categoryPath, formatDate, imageUrl, tagLabels } from '../lib/site';
+import { CATEGORIES, SITE_DESCRIPTION, SITE_NAME, articlePath, categoryKeyForArticle, categoryPath, excerptFromArticle, formatDate, imageUrl, stripHtml, tagLabels } from '../lib/site';
 
 const articles = await getArticles();
 const recommendedArticles = await getRecommendedArticles();
@@ -19,6 +19,33 @@ const categoryDisplay = {
   lounge: { label: 'ラウンジ', iconSrc: '/category-icons/chair.png' },
   train: { label: '鉄道', iconSrc: '/category-icons/train.png' }
 };
+const searchArticles = articles.map(article => {
+  const categoryKey = categoryKeyForArticle(article);
+  const category = CATEGORIES.find(item => item.key === categoryKey);
+  const title = article.title || 'Untitled';
+  const excerpt = excerptFromArticle(article, '');
+  const tags = tagLabels(article);
+  const date = formatDate(article.publishedAt || article.createdAt || article.updatedAt);
+
+  return {
+    title,
+    excerpt,
+    tags,
+    date,
+    url: articlePath(article),
+    image: imageUrl(article.image),
+    category: category?.label || categoryKey || '',
+    searchText: [
+      title,
+      excerpt,
+      stripHtml(article.content || ''),
+      tags.join(' '),
+      category?.label || '',
+      categoryKey || ''
+    ].join(' ').toLowerCase()
+  };
+});
+const searchArticlesJson = JSON.stringify(searchArticles).replace(/</g, '\\u003c');
 ---
 <BaseLayout title={SITE_NAME} description={SITE_DESCRIPTION} canonical="/">
   <script is:inline>
@@ -54,6 +81,10 @@ const categoryDisplay = {
         <input type="search" id="article-search" placeholder="keyword" />
       </label>
       <p class="meta" id="search-count"></p>
+    </section>
+
+    <section class="search-results" id="search-results" data-articles={searchArticlesJson} hidden>
+      <div class="card-grid" id="search-results-grid"></div>
     </section>
 
     {recommendedArticles.length > 0 && (
@@ -151,16 +182,43 @@ const categoryDisplay = {
 
     const search = document.getElementById('article-search');
     const count = document.getElementById('search-count');
-    const cards = Array.from(document.querySelectorAll('.post-card'));
+    const results = document.getElementById('search-results');
+    const resultsGrid = document.getElementById('search-results-grid');
+    const defaultSections = Array.from(document.querySelectorAll('.section, .latest-layout, .category-section'));
+    const articles = JSON.parse(results?.dataset.articles || '[]');
+    const escapeHtml = value => String(value || '').replace(/[&<>"']/g, character => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[character]);
+    const renderArticle = article => `
+      <a class="post-card" href="${escapeHtml(article.url)}">
+        <img src="${escapeHtml(article.image)}" alt="${escapeHtml(article.title)}" loading="lazy" />
+        <div class="post-card__body">
+          ${article.tags.length ? `<div class="post-card__tags" aria-label="Tags">${article.tags.map(tag => `<span class="badge">${escapeHtml(tag)}</span>`).join('')}</div>` : ''}
+          ${article.date ? `<div class="meta">${escapeHtml(article.date)}</div>` : ''}
+          <h3>${escapeHtml(article.title)}</h3>
+          ${article.excerpt ? `<p>${escapeHtml(article.excerpt)}</p>` : ''}
+        </div>
+      </a>
+    `;
     search?.addEventListener('input', () => {
       const keyword = search.value.trim().toLowerCase();
-      let visible = 0;
-      cards.forEach(card => {
-        const matched = !keyword || card.textContent.toLowerCase().includes(keyword);
-        card.style.display = matched ? '' : 'none';
-        if (keyword && matched) visible += 1;
+      const matchedArticles = keyword
+        ? articles.filter(article => article.searchText.includes(keyword))
+        : [];
+
+      defaultSections.forEach(section => {
+        section.hidden = Boolean(keyword);
       });
-      if (count) count.textContent = keyword ? `${visible}件の記事が見つかりました` : '';
+
+      if (results && resultsGrid) {
+        results.hidden = !keyword;
+        resultsGrid.innerHTML = matchedArticles.map(renderArticle).join('');
+      }
+      if (count) count.textContent = keyword ? `${matchedArticles.length}件の記事が見つかりました` : '';
     });
   </script>
 </BaseLayout>
