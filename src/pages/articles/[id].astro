@@ -337,11 +337,14 @@ const canonical = articlePath(article);
     z-index: 100;
     display: grid;
     place-items: center;
+    width: 100%;
+    min-height: 100dvh;
     border: 0;
     background: rgba(0, 0, 0, 0.82);
-    padding: 24px;
+    padding: 16px;
     cursor: zoom-out;
     opacity: 0;
+    overflow: hidden;
     transition: opacity 0.38s ease;
   }
 
@@ -354,8 +357,11 @@ const canonical = articlePath(article);
   }
 
   :global(.image-viewer img) {
-    max-width: min(1100px, 94vw);
-    max-height: 90vh;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(1100px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
     object-fit: contain;
     transform: scale(0.985);
     transition: transform 0.38s ease;
