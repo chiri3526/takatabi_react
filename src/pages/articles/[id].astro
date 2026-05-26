@@ -138,7 +138,8 @@ const canonical = articlePath(article);
 
 <style>
   .article-wrap {
-    width: min(1200px, 92vw);
+    width: min(1200px, calc(100vw - 24px));
+    max-width: 100%;
     margin: 24px auto 0;
   }
 
@@ -186,7 +187,9 @@ const canonical = articlePath(article);
   }
 
   .article-main,
+  .article-side,
   .side-panel {
+    min-width: 0;
     border: 1px solid var(--color-line);
     border-radius: 8px;
     background: #fff;
@@ -218,6 +221,7 @@ const canonical = articlePath(article);
 
   .article-content {
     font-size: 1.03rem;
+    overflow-wrap: anywhere;
   }
 
   .article-content :global(h2) {
@@ -243,12 +247,62 @@ const canonical = articlePath(article);
     margin: 0 auto 1.05em;
   }
 
+  .article-content :global(ul),
+  .article-content :global(ol) {
+    max-width: 760px;
+    margin: 0 auto 1.05em;
+    padding-left: clamp(1.2rem, 3vw, 1.5rem);
+  }
+
+  .article-content :global(li) {
+    overflow-wrap: anywhere;
+  }
+
+  .article-content :global(a) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   .article-content :global(.cms-image) {
     display: block;
     width: min(100%, 920px);
     margin: 22px auto;
     border-radius: 8px;
     cursor: zoom-in;
+  }
+
+  .article-content :global(table),
+  .article-content :global(pre) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .article-content :global(table) {
+    margin: 0 auto 1.2em;
+    border-collapse: collapse;
+  }
+
+  .article-content :global(th),
+  .article-content :global(td) {
+    min-width: 120px;
+    padding: 0.65rem 0.8rem;
+    border: 1px solid var(--color-line);
+    text-align: left;
+  }
+
+  .article-content :global(pre) {
+    margin: 0 auto 1.2em;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f6fff6;
+  }
+
+  .article-content :global(code) {
+    overflow-wrap: normal;
+    word-break: normal;
   }
 
   .article-side {
@@ -333,6 +387,11 @@ const canonical = articlePath(article);
   }
 
   @media (max-width: 900px) {
+    .article-wrap {
+      width: min(100%, calc(100vw - 16px));
+      margin-top: 16px;
+    }
+
     .article-grid {
       grid-template-columns: 1fr;
     }
@@ -346,12 +405,26 @@ const canonical = articlePath(article);
     }
 
     .article-hero__text {
-      padding: 24px;
+      padding: 20px;
       background: linear-gradient(180deg, rgba(9, 24, 11, 0), rgba(9, 24, 11, 0.82));
     }
 
     .article-hero h1 {
-      font-size: 1rem;
+      font-size: clamp(1.5rem, 6vw, 2rem);
+      line-height: 1.35;
+    }
+
+    .article-main {
+      padding: 18px 14px;
+    }
+
+    .article-content {
+      font-size: 0.98rem;
+    }
+
+    .article-content :global(table),
+    .article-content :global(pre) {
+      font-size: 0.92rem;
     }
 
     .article-content :global(h2) {
