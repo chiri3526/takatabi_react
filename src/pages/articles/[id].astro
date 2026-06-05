@@ -136,7 +136,8 @@ const canonical = articlePath(article);
     }
 
     document.querySelectorAll('.article-content img.cms-image').forEach(image => {
-      image.addEventListener('click', () => {
+      let ignoreNextClick = false;
+      const openViewer = () => {
         const src = safeViewerImageUrl(image.getAttribute('src'));
         if (!src) return;
 
@@ -155,7 +156,23 @@ const canonical = articlePath(article);
         overlay.appendChild(viewerImage);
         overlay.addEventListener('click', closeViewer);
         document.body.appendChild(overlay);
+        overlay.getBoundingClientRect();
         requestAnimationFrame(() => overlay.classList.add('is-open'));
+      };
+
+      image.addEventListener('pointerup', event => {
+        if (event.pointerType === 'mouse') return;
+        event.preventDefault();
+        ignoreNextClick = true;
+        openViewer();
+      });
+
+      image.addEventListener('click', () => {
+        if (ignoreNextClick) {
+          ignoreNextClick = false;
+          return;
+        }
+        openViewer();
       });
     });
   </script>
@@ -372,6 +389,7 @@ const canonical = articlePath(article);
     opacity: 0;
     overflow: hidden;
     transition: opacity 0.38s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
   :global(.image-viewer.is-open) {
@@ -389,11 +407,15 @@ const canonical = articlePath(article);
     max-width: min(1100px, calc(100vw - 32px));
     max-height: calc(100dvh - 32px);
     object-fit: contain;
-    transform: scale(0.985);
-    transition: transform 0.38s ease;
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+    transition:
+      opacity 0.38s ease,
+      transform 0.38s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
   :global(.image-viewer.is-open img) {
+    opacity: 1;
     transform: scale(1);
   }
 
